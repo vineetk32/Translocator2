@@ -283,7 +283,8 @@ namespace TestApp
                         StopName = currStop.name,
                         StopID = currStop.stop_id,
                         Agencies = currStop.agency_ids,
-                        Routes = currStop.routes
+                        Routes = currStop.routes,
+                        StopCode = currStop.code
                     });
                 });
             }

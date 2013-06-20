@@ -16,14 +16,16 @@ namespace TestApp
 {
     public class StopViewModel : INotifyPropertyChanged
     {
-        private string _stopName;
+        private string _stopName, _stopCode;
         private int _stopID;
         private List<int> _agencies,_routes;
+        private Dictionary<string, string> _arrival_estimates;
 
         public StopViewModel()
         {
             _agencies = new List<int>();
             _routes = new List<int>();
+            _arrival_estimates = new Dictionary<string, string>();
         }
 
         public List<int> Agencies
@@ -86,6 +88,22 @@ namespace TestApp
                 }
             }
         }
+
+        public string StopCode
+        {
+            get
+            {
+                return _stopCode;
+            }
+            set
+            {
+                if (value != _stopCode)
+                {
+                    _stopCode = value;
+                }
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
