@@ -72,6 +72,25 @@ public class Stop
     public string name;
 }
 
+public class ArrivalRoot
+{
+    public ArrivalRoot() { data = new List<StopArrival>(); }
+    public List<StopArrival> data { get; set; }
+}
+
+public class StopArrival
+{
+    public int agency_id;
+    public string stop_id;
+    public List<Arrival> arrivals;
+}
+
+public class Arrival
+{
+    public long route_id, vehicle_id;
+    public string arrival_at;
+}
+
 namespace TestApp
 {
     public class MainViewModel : INotifyPropertyChanged
@@ -84,6 +103,7 @@ namespace TestApp
 
             this.routeCache = new Dictionary<long, Route>();
             this.stopCache = new Dictionary<long, Stop>();
+
 
             this.selectedRoutes = new List<long>();
             this.availableStops = new Dictionary<long, int>();
@@ -98,6 +118,7 @@ namespace TestApp
 
         public Dictionary<long,Route> routeCache;
         public Dictionary<long, Stop> stopCache;
+        public Dictionary<long, Arrival> arrivalCache;
 
         public List<long> selectedRoutes;
         public Dictionary<long, int> availableStops;
@@ -135,6 +156,22 @@ namespace TestApp
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadStopsCallback), request);
         }
+
+        public void addArrivals()
+        {
+            StringBuilder agencies,routes;
+            agencies = new StringBuilder();
+            routes = new StringBuilder();
+
+            foreach (int routeID in selectedRoutes)
+            {
+                agencies.Append(routeCache[routeID].agency_id.ToString() + ',');
+            }
+            String uri = "http://api.transloc.com/1.1/arrival-estimates.json?agencies=" + agencies.ToString() + "&routes=" + string.Join(",", selectedRoutes);
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadArrivalsCallback), request);
+        }
+
 
         public void removeRoutes(int agencyID)
         {
@@ -245,6 +282,36 @@ namespace TestApp
             }
         }
 
+        private void ReadArrivalsCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
+            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
+            using (StreamReader streamReader1 = new StreamReader(response.GetResponseStream()))
+            {
+                string resultString = streamReader1.ReadToEnd();
+                var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
+                foreach (var stoparrival in arrivalsroot.data)
+                {
+                    Dictionary<long, string> arrivalsAtStop = new Dictionary<long, string>();
+                    DateTime arrivalTime = new DateTime();
+                    foreach (var arrival in stoparrival.arrivals)
+                    {
+                        arrivalTime = DateTime.ParseExact(arrival.arrival_at, new string[] { "s", "u" }, 
+                            System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None);
+                        if (arrivalsAtStop.ContainsKey(arrival.route_id))
+                        {
+                            arrivalsAtStop[arrival.route_id] += ", " + arrivalTime.ToLocalTime().ToShortTimeString();
+                        }
+                        else
+                        {
+                            arrivalsAtStop[arrival.route_id] = arrivalTime.ToLocalTime().ToShortTimeString();
+                        }
+                    }
+                }
+            }
+        }
+
+
         public void cleanUpStops()
         {
             /*bool flag = false;
@@ -288,6 +355,7 @@ namespace TestApp
                     });
                 });
             }
+            addArrivals();
         }
     }
 }

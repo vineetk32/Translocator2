@@ -76,8 +76,6 @@
                             <StackPanel>
                             <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
                             <TextBlock Text="{Binding StopCode, StringFormat='Stop code: {0}'}" TextWrapping="Wrap" Style="{StaticResource PhoneTextSmallStyle}"/>
-                                <ListBox ItemsSource="{Binding Routes}" Style="{StaticResource PhoneTextSmallStyle}">
-                                </ListBox>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
