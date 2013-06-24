@@ -14,17 +14,23 @@ using System.Collections.Generic;
 
 namespace TestApp
 {
+    public class ArrivalInfo
+    {
+        public string routeName, arrivalTimes, routeColor;
+    }
+
     public class StopViewModel : INotifyPropertyChanged
     {
         private string _stopName, _stopCode;
-        private int _stopID;
-        private List<int> _agencies,_routes;
+        private long _stopID;
+        private List<int> _agencies;
+        private List<long> _routes;
         private Dictionary<string, string> _arrival_estimates;
 
         public StopViewModel()
         {
             _agencies = new List<int>();
-            _routes = new List<int>();
+            _routes = new List<long>();
             _arrival_estimates = new Dictionary<string, string>();
         }
 
@@ -43,7 +49,7 @@ namespace TestApp
             }
         }
 
-        public List<int> Routes
+        public List<long> Routes
         {
             get
             {
@@ -74,7 +80,7 @@ namespace TestApp
             }
         }
 
-        public int StopID
+        public long StopID
         {
             get
             {
@@ -104,7 +110,22 @@ namespace TestApp
             }
         }
 
+        public Dictionary<string, string> ArrivalEstimates
+        {
+            get
+            {
+                return _arrival_estimates;
+            }
+            set
+            {
+                if (value != _arrival_estimates)
+                {
+                    _arrival_estimates = value;
+                }
+            }
+        }
 
+ 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {

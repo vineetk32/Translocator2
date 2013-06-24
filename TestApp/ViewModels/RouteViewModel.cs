@@ -18,16 +18,17 @@ namespace TestApp
     {
         private string _routeName,_routeShortName;
         private bool _isSelected;
-        private int _agencyID,_routeID;
+        private int _agencyID;
+        private long _routeID;
         private string _text_color;
-        private List<int> _stops;
+        private List<long> _stops;
 
         public RouteViewModel()
         {
-            _stops = new List<int>();
+            _stops = new List<long>();
         }
 
-        public List<int> Stops
+        public List<long> Stops
         {
             get
             {
@@ -58,7 +59,7 @@ namespace TestApp
             }
         }
 
-        public int RouteID
+        public long RouteID
         {
             get
             {
@@ -141,7 +142,8 @@ namespace TestApp
                                 App.ViewModel.availableStops[stop]--;
                         }
                     }
-                    App.ViewModel.cleanUpStops();
+                    App.ViewModel.addArrivals();
+                    //App.ViewModel.cleanUpStops();
                     NotifyPropertyChanged("IsSelected");
                 }
             }

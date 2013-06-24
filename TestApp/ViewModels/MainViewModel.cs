@@ -26,7 +26,7 @@ public class Agency
 {
     public string long_name { get; set; }
     public string short_name { get; set; }
-    public string url { get; set; }
+    //public string url { get; set; }
     public int agency_id { get; set; }
 }
 
@@ -39,19 +39,19 @@ public class RouteRoot
 
 public class Route
 {
-    public Route() { segments = new List<int>(); stops = new List<int>(); }
-    public string description { get; set; }
+    public Route() { /*segments = new List<int>();*/ stops = new List<long>(); }
+    //public string description { get; set; }
     public string short_name { get; set; }
-    public int route_id { get; set; }
+    public long route_id { get; set; }
     public string color { get; set; }
-    public List<int> segments;
+    //public List<int> segments;
     public int agency_id { get; set; }
     public string text_color { get; set; }
     public string long_name { get; set; }
-    public string url { get; set; }
-    public bool is_hidden { get; set; }
-    public string type { get; set; }
-    public List<int> stops { get; set; }
+    //public string url { get; set; }
+    //public bool is_hidden { get; set; }
+    //public string type { get; set; }
+    public List<long> stops { get; set; }
 }
 
 public class StopRoot
@@ -62,13 +62,13 @@ public class StopRoot
 
 public class Stop
 {
-    public Stop() { agency_ids = new List<int>(); routes = new List<int>(); }
+    public Stop() { agency_ids = new List<int>(); routes = new List<long>(); }
     public string code;
     public List<int> agency_ids;
-    public string location_type;
+    //public string location_type;
     ///location is a tuple of float lat,float lng
-    public int stop_id;
-    public List<int> routes;
+    public long stop_id;
+    public List<long> routes;
     public string name;
 }
 
@@ -81,7 +81,7 @@ public class ArrivalRoot
 public class StopArrival
 {
     public int agency_id;
-    public string stop_id;
+    public long stop_id;
     public List<Arrival> arrivals;
 }
 
@@ -103,7 +103,7 @@ namespace TestApp
 
             this.routeCache = new Dictionary<long, Route>();
             this.stopCache = new Dictionary<long, Stop>();
-
+            this.arrivalCache = new Dictionary<long, Dictionary<string, string>>();
 
             this.selectedRoutes = new List<long>();
             this.availableStops = new Dictionary<long, int>();
@@ -118,7 +118,7 @@ namespace TestApp
 
         public Dictionary<long,Route> routeCache;
         public Dictionary<long, Stop> stopCache;
-        public Dictionary<long, Arrival> arrivalCache;
+        public Dictionary<long, Dictionary<string, string>> arrivalCache;
 
         public List<long> selectedRoutes;
         public Dictionary<long, int> availableStops;
@@ -186,9 +186,20 @@ namespace TestApp
                     {
                         this.routes.Remove(item);
                     });
+                    foreach (long stop in item.Stops)
+                    {
+                        if (availableStops[stop] == 1)
+                        {
+                            availableStops.Remove(stop);
+                            stopCache.Remove(stop);
+                        }
+                        else
+                        {
+                            availableStops[stop]--;
+                        }
+                    }
                 }
             }
-            //cleanUpStops();
         }
 
 
@@ -292,23 +303,37 @@ namespace TestApp
                 var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
                 foreach (var stoparrival in arrivalsroot.data)
                 {
-                    Dictionary<long, string> arrivalsAtStop = new Dictionary<long, string>();
-                    DateTime arrivalTime = new DateTime();
+                    //Dictionary<long, string> arrivalsAtStop = new Dictionary<long, string>();
+                  
+                    long stopID = stoparrival.stop_id;
                     foreach (var arrival in stoparrival.arrivals)
                     {
-                        arrivalTime = DateTime.ParseExact(arrival.arrival_at, new string[] { "s", "u" }, 
-                            System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None);
-                        if (arrivalsAtStop.ContainsKey(arrival.route_id))
+                        /* arrivalTime = DateTime.ParseExact(arrival.arrival_at, "o", 
+                            System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind);*/
+                        //DateTime arrivalTime = new DateTime();
+                        string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
+                        string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
+
+                        if (arrivalCache.ContainsKey(stopID))
                         {
-                            arrivalsAtStop[arrival.route_id] += ", " + arrivalTime.ToLocalTime().ToShortTimeString();
+                            if (arrivalCache[stopID].ContainsKey(routeName))
+                            {
+                                arrivalCache[stopID][routeName] += ", " + arrivalTime;
+                            }
+                            else
+                            {
+                                arrivalCache[stopID].Add(routeName, arrivalTime);
+                            }
                         }
                         else
                         {
-                            arrivalsAtStop[arrival.route_id] = arrivalTime.ToLocalTime().ToShortTimeString();
+                            arrivalCache.Add(stopID,new Dictionary<string,string>());
+                            arrivalCache[stopID].Add(routeName, arrivalTime);
                         }
                     }
                 }
             }
+            cleanUpStops();
         }
 
 
@@ -336,26 +361,36 @@ namespace TestApp
                     });
                 }
             }*/
+            
             Deployment.Current.Dispatcher.BeginInvoke(delegate
             {
                 this.stops.Clear();
             });
+
             foreach (long stopID in availableStops.Keys)
             {
                 Stop currStop = stopCache[stopID];
                 Deployment.Current.Dispatcher.BeginInvoke(delegate
                 {
-                    this.stops.Add(new StopViewModel()
+                    StopViewModel newStop = new StopViewModel()
                     {
                         StopName = currStop.name,
                         StopID = currStop.stop_id,
                         Agencies = currStop.agency_ids,
                         Routes = currStop.routes,
-                        StopCode = currStop.code
-                    });
+                        StopCode = currStop.code,
+                    };
+                    if (arrivalCache.ContainsKey(stopID))
+                    {
+                        newStop.ArrivalEstimates = arrivalCache[stopID];
+                    }
+                    else
+                    {
+                        newStop.ArrivalEstimates = new Dictionary<string,string>();
+                    }
+                    this.stops.Add(newStop);
                 });
             }
-            addArrivals();
         }
     }
 }

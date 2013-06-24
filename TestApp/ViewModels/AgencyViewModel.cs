@@ -74,6 +74,7 @@ namespace TestApp
                     else if (value == false)
                     {
                         App.ViewModel.removeRoutes(this.AgencyID);
+                        App.ViewModel.cleanUpStops();
                     }
                     NotifyPropertyChanged("IsSelected");
                 }
