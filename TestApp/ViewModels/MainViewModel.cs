@@ -181,23 +181,12 @@ namespace TestApp
                 if (this.routes[i].AgencyID == agencyID)
                 {
                     routeCache.Remove(routes[i].RouteID);
-                    selectedRoutes.Remove(routes[i].RouteID);
+                    removeRoute(item.RouteID, item.Stops);
+
                     Deployment.Current.Dispatcher.BeginInvoke(delegate
                     {
                         this.routes.Remove(item);
                     });
-                    foreach (long stop in item.Stops)
-                    {
-                        if (availableStops[stop] == 1)
-                        {
-                            availableStops.Remove(stop);
-                            stopCache.Remove(stop);
-                        }
-                        else
-                        {
-                            availableStops[stop]--;
-                        }
-                    }
                 }
             }
         }
@@ -288,7 +277,10 @@ namespace TestApp
                 var stopsroot = JsonConvert.DeserializeObject<StopRoot>(resultString);
                 foreach (var stop in stopsroot.data)
                 {
-                    stopCache.Add(stop.stop_id, stop);
+                    if (stopCache.ContainsKey(stop.stop_id) == false)
+                    {
+                        stopCache.Add(stop.stop_id, stop);
+                    }
                 }
             }
         }
@@ -316,26 +308,65 @@ namespace TestApp
 
                         if (arrivalCache.ContainsKey(stopID))
                         {
-                            if (arrivalCache[stopID].ContainsKey(routeName))
+                            if ( (arrivalCache[stopID]).ContainsKey(routeName))
                             {
-                                arrivalCache[stopID][routeName] += ", " + arrivalTime;
+                                (arrivalCache[stopID])[routeName] += ", " + arrivalTime;
                             }
                             else
                             {
-                                arrivalCache[stopID].Add(routeName, arrivalTime);
+                                (arrivalCache[stopID]).Add(routeName, arrivalTime);
                             }
                         }
                         else
                         {
                             arrivalCache.Add(stopID,new Dictionary<string,string>());
-                            arrivalCache[stopID].Add(routeName, arrivalTime);
+                            (arrivalCache[stopID]).Add(routeName, arrivalTime);
                         }
                     }
                 }
             }
+            /*StringBuilder contents = new StringBuilder();
+            foreach (long StopID in arrivalCache.Keys)
+            {
+                contents.Append("\n" + StopID.ToString());
+                foreach (string RouteName in arrivalCache[StopID].Keys)
+                {
+                    contents.Append(" " + RouteName.ToString() + ":" + arrivalCache[StopID][RouteName]);
+                }
+            }*/
             cleanUpStops();
         }
 
+
+        public void removeRoute(long RouteID, List<long> Stops)
+        {
+            selectedRoutes.Remove(RouteID);
+            foreach (long stop in Stops)
+            {
+                if (availableStops.ContainsKey(stop))
+                {
+                    if (availableStops[stop] == 1)
+                    {
+                        availableStops.Remove(stop);
+                        stopCache.Remove(stop);
+                    }
+                    else
+                        availableStops[stop]--;
+                }
+            }
+        }
+
+        public void addRoute(long RouteID, List<long> Stops)
+        {
+            selectedRoutes.Add(RouteID);
+            foreach (long stop in Stops)
+            {
+                if (availableStops.ContainsKey(stop))
+                    availableStops[stop]++;
+                else
+                    availableStops.Add(stop, 1);
+            }
+        }
 
         public void cleanUpStops()
         {

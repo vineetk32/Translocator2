@@ -78,14 +78,9 @@
                             <TextBlock Text="{Binding StopCode, StringFormat='Stop code: {0}'}" TextWrapping="Wrap" Style="{StaticResource PhoneTextSmallStyle}"/>
                                 <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}">
                                     <ListBox.ItemTemplate>
-                                        <DataTemplate x:Name="CurrArrival">
+                                        <DataTemplate>
                                             <StackPanel>
                                                 <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-
                                                     <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="{Binding Key}" Style="{StaticResource PhoneTextNormalStyle}"/>
                                                     <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" Style="{StaticResource PhoneTextNormalStyle}"/>
                                                 </Grid>
@@ -102,4 +97,10 @@
 
         </controls:Pivot>
     </Grid>
+    <!-- <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar.feature.settings.rest.png" Text="Show/Hide"/>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+
 </phone:PhoneApplicationPage>

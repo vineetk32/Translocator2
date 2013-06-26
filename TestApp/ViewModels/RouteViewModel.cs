@@ -122,27 +122,13 @@ namespace TestApp
                     _isSelected = value;
                     if (value == true)
                     {
-                        App.ViewModel.selectedRoutes.Add(this.RouteID);
-                        foreach (long stop in this._stops)
-                        {
-                            if (App.ViewModel.availableStops.ContainsKey(stop))
-                                App.ViewModel.availableStops[stop]++;
-                            else
-                                App.ViewModel.availableStops.Add(stop, 1);
-                        }
+                        App.ViewModel.addRoute(this.RouteID,this.Stops);
+                        App.ViewModel.addArrivals();
                     }
                     else
                     {
-                        App.ViewModel.selectedRoutes.Remove(this.RouteID);
-                        foreach (long stop in this._stops)
-                        {
-                            if (App.ViewModel.availableStops[stop] == 1)
-                                App.ViewModel.availableStops.Remove(stop);
-                            else
-                                App.ViewModel.availableStops[stop]--;
-                        }
+                        App.ViewModel.removeRoute(this.RouteID, this.Stops);
                     }
-                    App.ViewModel.addArrivals();
                     //App.ViewModel.cleanUpStops();
                     NotifyPropertyChanged("IsSelected");
                 }
