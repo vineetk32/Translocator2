@@ -68,13 +68,16 @@ namespace TestApp
                     _isSelected = value;
                     if (value == true)
                     {
+                        App.ViewModel.selectedAgencies.Add(this._agencyID);
                         App.ViewModel.addRoutes(this.AgencyID);
                         App.ViewModel.addStops(this.AgencyID);
                     }
                     else if (value == false)
                     {
+                        App.ViewModel.selectedAgencies.Remove(this._agencyID);
                         App.ViewModel.removeRoutes(this.AgencyID);
-                        App.ViewModel.cleanUpStops();
+                        //TODO
+                        //App.ViewModel.cleanUpStops();
                     }
                     NotifyPropertyChanged("IsSelected");
                 }

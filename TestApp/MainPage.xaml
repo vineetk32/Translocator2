@@ -4,24 +4,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    
+    
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
-    d:DataContext="{d:DesignData SampleData/MainViewModelSampleData.xaml}"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded">
+    shell:SystemTray.IsVisible="True">
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
-        <controls:Pivot Title="Transit Tracker">
-            <!--Pivot item one-->
+        <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" SelectionChanged="ParentPivot_SelectionChanged">
+
+            <!-- <controls:PivotItem Header="map">
+                <map:Map CredentialsProvider="AndTilJO3zG0iba272rBy5fJGmw_ulvigQDXiqCKbSzQTzWt00oF-AV_7vJ4quno" Name="myMap"/>
+            </controls:PivotItem> -->
+
             <controls:PivotItem Header="agencies">
-                <!--Double line list with text wrapping-->
                 <ListBox x:Name="FirstListBox" Margin="0,0,-12,0" ItemsSource="{Binding Path=agencies, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -35,7 +40,7 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 
-                                <CheckBox Grid.Column="0" Grid.Row="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                <CheckBox x:Name="chkAgency" Grid.Column="0" Grid.Row="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" Checked="chkAgency_Checked" Unchecked="chkAgency_Unchecked"/>
                                 <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding AgencyShortName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
                                 <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding AgencyName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
                             </Grid>
@@ -45,7 +50,7 @@
             </controls:PivotItem>
  
             <!--Pivot item two-->
-            <controls:PivotItem Header="routes">
+            <controls:PivotItem Header="routes" x:Name="RoutesPivot">
                 <ListBox x:Name="RoutesListBox" Margin="0,0,-12,0" ItemsSource="{Binding routes}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -59,7 +64,7 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 
-                                <CheckBox Grid.Column="0" Grid.Row="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                <CheckBox x:Name="chkRoute" Grid.Column="0" Grid.Row="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" Checked="chkRoute_Checked" Unchecked="chkRoute_Unchecked"/>
                                 <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding RouteShortName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Foreground="{Binding TextColor}"/>
                                 <TextBlock Grid.Column="1" Grid.Row="1"  Text="{Binding RouteName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
                             </Grid>
@@ -69,34 +74,49 @@
             </controls:PivotItem>
 
             <!--Pivot item two-->
-            <controls:PivotItem Header="stops">
-                <ListBox x:Name="StopsListBox" Margin="0,0,-12,0" ItemsSource="{Binding stops}">
+            <controls:PivotItem x:Name="StopsPivot" Header="stops">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <toolkit:ListPicker Grid.Row="0" x:Name="RouteCombo" Header="Selected Route" ItemsSource="{Binding selectedRoutesNames}" Margin="20" SelectionChanged="ListPicker_SelectionChanged"/>
+
+                    <ListBox Grid.Row="1" x:Name="StopsListBox" Margin="0,0,-12,0" ItemsSource="{Binding stops}" CacheMode="BitmapCache">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:Name="CurrStop">
-                            <StackPanel>
-                            <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
                             <TextBlock Text="{Binding StopCode, StringFormat='Stop code: {0}'}" TextWrapping="Wrap" Style="{StaticResource PhoneTextSmallStyle}"/>
-                                <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}">
+                                <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel>
-                                                <Grid>
-                                                    <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="{Binding Key}" Style="{StaticResource PhoneTextNormalStyle}"/>
-                                                    <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" Style="{StaticResource PhoneTextNormalStyle}"/>
-                                                </Grid>
-                                            </StackPanel>
-                                        </DataTemplate>
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" Text="{Binding Key}" Style="{StaticResource PhoneTextAccentStyle}"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" Style="{StaticResource PhoneTextAccentStyle}"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+
+                </Grid>
             </controls:PivotItem>
 
 
         </controls:Pivot>
-    </Grid>
+        </Grid>
     <!-- <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
             <shell:ApplicationBarIconButton IconUri="/Images/appbar.feature.settings.rest.png" Text="Show/Hide"/>

@@ -123,13 +123,12 @@ namespace TestApp
                     if (value == true)
                     {
                         App.ViewModel.addRoute(this.RouteID,this.Stops);
-                        App.ViewModel.addArrivals();
+                        //App.ViewModel.cacheArrivals(this.RouteID);
                     }
                     else
                     {
                         App.ViewModel.removeRoute(this.RouteID, this.Stops);
                     }
-                    //App.ViewModel.cleanUpStops();
                     NotifyPropertyChanged("IsSelected");
                 }
             }

@@ -1,20 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
+
 
 public class AgencyRoot
 {
@@ -49,7 +42,7 @@ public class Route
     public string text_color { get; set; }
     public string long_name { get; set; }
     //public string url { get; set; }
-    //public bool is_hidden { get; set; }
+    public bool is_active { get; set; }
     //public string type { get; set; }
     public List<long> stops { get; set; }
 }
@@ -100,28 +93,38 @@ namespace TestApp
             this.agencies = new ObservableCollection<AgencyViewModel>();
             this.routes = new ObservableCollection<RouteViewModel>();
             this.stops = new ObservableCollection<StopViewModel>();
+            this.selectedRoutesNames = new ObservableCollection<string>();
 
             this.routeCache = new Dictionary<long, Route>();
             this.stopCache = new Dictionary<long, Stop>();
             this.arrivalCache = new Dictionary<long, Dictionary<string, string>>();
 
             this.selectedRoutes = new List<long>();
-            this.availableStops = new Dictionary<long, int>();
+            this.selectedAgencies = new List<long>();
+            /*dt = new System.Windows.Threading.DispatcherTimer();
+            dt.Interval = new TimeSpan(0, 0, 0, 5);
+            dt.Tick += new EventHandler(dt_Tick);
+            dt.Start();*/
         }
 
-        /// <summary>
-        /// A collection for ItemViewModel objects.
-        /// </summary>
         public ObservableCollection<AgencyViewModel> agencies { get; private set; }
         public ObservableCollection<RouteViewModel> routes { get; private set; }
         public ObservableCollection<StopViewModel> stops { get; private set; }
+        public ObservableCollection<String> selectedRoutesNames { get; private set; }
 
         public Dictionary<long,Route> routeCache;
         public Dictionary<long, Stop> stopCache;
         public Dictionary<long, Dictionary<string, string>> arrivalCache;
 
         public List<long> selectedRoutes;
-        public Dictionary<long, int> availableStops;
+        public List<long> selectedAgencies;
+
+        /*public System.Windows.Threading.DispatcherTimer dt;
+
+        public void dt_Tick(object sender, EventArgs r)
+        {
+            MessageBox.Show("Timer function");
+        }*/
 
         public bool IsDataLoaded
         {
@@ -137,29 +140,36 @@ namespace TestApp
             // Sample data; replace with real data
             //this.Items.Add(new ItemViewModel() { LineOne = "runtime one", LineTwo = "Maecenas praesent accumsan bibendum" });
 
-            String uri = "http://api.transloc.com/1.1/agencies.json";
+            String uri = "http://api.transloc.com/1.2/agencies.json";
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadCallback), request);
-
+            this.IsDataLoaded = true;
         }
 
         public void addRoutes(int agencyID)
         {
-            String uri = "http://api.transloc.com/1.1/routes.json?agencies=" + agencyID;
+            String uri = "http://api.transloc.com/1.2/routes.json?agencies=" + agencyID;
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadRoutesCallback), request);
         }
 
         public void addStops(int agencyID)
         {
-            String uri = "http://api.transloc.com/1.1/stops.json?agencies=" + agencyID;
+            String uri = "http://api.transloc.com/1.2/stops.json?agencies=" + agencyID;
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadStopsCallback), request);
         }
 
-        public void addArrivals()
+        public void cacheArrivals(long routeID)
         {
-            StringBuilder agencies,routes;
+            String uri = "http://api.transloc.com/1.2/arrival-estimates.json?agencies=" + routeCache[routeID].agency_id + "&routes=" + routeID;
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadArrivalsCallback), request);
+        }
+
+        public void cacheAllArrivals()
+        {
+            StringBuilder agencies, routes;
             agencies = new StringBuilder();
             routes = new StringBuilder();
 
@@ -167,9 +177,54 @@ namespace TestApp
             {
                 agencies.Append(routeCache[routeID].agency_id.ToString() + ',');
             }
-            String uri = "http://api.transloc.com/1.1/arrival-estimates.json?agencies=" + agencies.ToString() + "&routes=" + string.Join(",", selectedRoutes);
+            String uri = "http://api.transloc.com/1.2/arrival-estimates.json?agencies=" + agencies.ToString() + "&routes=" + string.Join(",", selectedRoutes);
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadArrivalsCallback), request);
+        }
+
+
+        public void addArrivalsForRoute(string routeName)
+        {
+            Route selectedRoute;
+
+            int routeIndex = selectedRoutesNames.IndexOf(routeName);
+            selectedRoute = routeCache[selectedRoutes[routeIndex]];
+
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            {
+                this.stops.Clear();
+            });
+
+            foreach (long stopID in selectedRoute.stops)
+            {
+
+                Stop currStop = stopCache[stopID];
+                StopViewModel newStop = new StopViewModel()
+                {
+                    StopName = currStop.name,
+                    StopID = currStop.stop_id,
+                    Agencies = currStop.agency_ids,
+                    Routes = currStop.routes,
+                    StopCode = currStop.code,
+                };
+                if (arrivalCache.ContainsKey(stopID))
+                {
+                    newStop.ArrivalEstimates = arrivalCache[stopID];
+                }
+                else
+                {
+                    newStop.ArrivalEstimates = new Dictionary<string, string>();
+                }
+                //Add the stop only if has any arrivals.
+                //TODO - add the stop, and no arrivals instead later.
+                if (newStop.ArrivalEstimates.Count > 0)
+                {
+                    Deployment.Current.Dispatcher.BeginInvoke(delegate
+                    {
+                        this.stops.Add(newStop);
+                    });
+                }
+            }
         }
 
 
@@ -180,8 +235,8 @@ namespace TestApp
                 RouteViewModel item = this.routes[i];
                 if (this.routes[i].AgencyID == agencyID)
                 {
-                    routeCache.Remove(routes[i].RouteID);
                     removeRoute(item.RouteID, item.Stops);
+                    routeCache.Remove(routes[i].RouteID);
 
                     Deployment.Current.Dispatcher.BeginInvoke(delegate
                     {
@@ -227,9 +282,7 @@ namespace TestApp
                             AgencyID = agency.agency_id
                         });
                     }
-                    this.IsDataLoaded = true;
                 });
-                //Deployment.Current.Dispatcher.BeginInvoke(() => this.agencies.);
             }
         }
 
@@ -248,21 +301,25 @@ namespace TestApp
                     {
                         foreach (var route in agency.Value)
                         {
-                            this.routes.Add(new RouteViewModel()
+                            if (route.is_active == true)
                             {
-                                RouteName = route.long_name,
-                                RouteShortName = route.short_name,
-                                IsSelected = false,
-                                AgencyID = route.agency_id,
-                                RouteID = route.route_id,
-                                TextColor = "#" + route.color.ToUpper(),
-                                Stops = route.stops
-                            });
-                            routeCache.Add(route.route_id, route);
+                                this.routes.Add(new RouteViewModel()
+                                {
+                                    RouteName = route.long_name,
+                                    RouteShortName = route.short_name,
+                                    IsSelected = false,
+                                    AgencyID = route.agency_id,
+                                    RouteID = route.route_id,
+                                    TextColor = "#" + route.color.ToUpper(),
+                                    Stops = route.stops
+                                });
+                                if (routeCache.ContainsKey(route.route_id) == false)
+                                {
+                                    routeCache.Add(route.route_id, route);
+                                }
+                            }
                         }
                     }
-                    //cleanUpStops();
-                    //this.IsDataLoaded = true;
                 });
             }
         }
@@ -295,14 +352,10 @@ namespace TestApp
                 var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
                 foreach (var stoparrival in arrivalsroot.data)
                 {
-                    //Dictionary<long, string> arrivalsAtStop = new Dictionary<long, string>();
-                  
+                 
                     long stopID = stoparrival.stop_id;
                     foreach (var arrival in stoparrival.arrivals)
                     {
-                        /* arrivalTime = DateTime.ParseExact(arrival.arrival_at, "o", 
-                            System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind);*/
-                        //DateTime arrivalTime = new DateTime();
                         string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
                         string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
 
@@ -333,66 +386,40 @@ namespace TestApp
                 {
                     contents.Append(" " + RouteName.ToString() + ":" + arrivalCache[StopID][RouteName]);
                 }
-            }*/
-            cleanUpStops();
+            }
+            cleanUpStops(); */
+            //TODO - remove this bullshit way of doing this, and use await() instead.
+            if (selectedRoutesNames.Count > 0)
+            {
+                string route = selectedRoutesNames[0];
+                addArrivalsForRoute(route);
+            }
         }
 
 
         public void removeRoute(long RouteID, List<long> Stops)
         {
             selectedRoutes.Remove(RouteID);
-            foreach (long stop in Stops)
+            string routeName = routeCache[RouteID].short_name + " - " + routeCache[RouteID].long_name;
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
             {
-                if (availableStops.ContainsKey(stop))
-                {
-                    if (availableStops[stop] == 1)
-                    {
-                        availableStops.Remove(stop);
-                        stopCache.Remove(stop);
-                    }
-                    else
-                        availableStops[stop]--;
-                }
-            }
+                this.selectedRoutesNames.Remove(routeName);
+            });
         }
 
         public void addRoute(long RouteID, List<long> Stops)
         {
             selectedRoutes.Add(RouteID);
-            foreach (long stop in Stops)
+            string routeName = routeCache[RouteID].short_name + " - " + routeCache[RouteID].long_name;
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
             {
-                if (availableStops.ContainsKey(stop))
-                    availableStops[stop]++;
-                else
-                    availableStops.Add(stop, 1);
-            }
+                this.selectedRoutesNames.Add(routeName);
+            });
         }
 
-        public void cleanUpStops()
+        /* public void cleanUpStops()
         {
-            /*bool flag = false;
-            for (int i = this.stops.Count - 1; i >= 0; i--)
-            {
-                flag = false;
-                StopViewModel item = this.stops[i];
-                foreach (int routeid in selectedRoutes)
-                {
-                    if (item.Routes.Contains(routeid))
-                    {
-                        flag = true;
-                        break;
-                    }
-                }
-                if (flag == false)
-                {
-                    Deployment.Current.Dispatcher.BeginInvoke(delegate
-                    {
-                        //this.stops.Remove(item);
-                        availableStops.Remove(item.StopID);
-                    });
-                }
-            }*/
-            
+        
             Deployment.Current.Dispatcher.BeginInvoke(delegate
             {
                 this.stops.Clear();
@@ -401,27 +428,27 @@ namespace TestApp
             foreach (long stopID in availableStops.Keys)
             {
                 Stop currStop = stopCache[stopID];
+                StopViewModel newStop = new StopViewModel()
+                {
+                    StopName = currStop.name,
+                    StopID = currStop.stop_id,
+                    Agencies = currStop.agency_ids,
+                    Routes = currStop.routes,
+                    StopCode = currStop.code,
+                };
+                if (arrivalCache.ContainsKey(stopID))
+                {
+                    newStop.ArrivalEstimates = arrivalCache[stopID];
+                }
+                else
+                {
+                    newStop.ArrivalEstimates = new Dictionary<string,string>();
+                }
                 Deployment.Current.Dispatcher.BeginInvoke(delegate
                 {
-                    StopViewModel newStop = new StopViewModel()
-                    {
-                        StopName = currStop.name,
-                        StopID = currStop.stop_id,
-                        Agencies = currStop.agency_ids,
-                        Routes = currStop.routes,
-                        StopCode = currStop.code,
-                    };
-                    if (arrivalCache.ContainsKey(stopID))
-                    {
-                        newStop.ArrivalEstimates = arrivalCache[stopID];
-                    }
-                    else
-                    {
-                        newStop.ArrivalEstimates = new Dictionary<string,string>();
-                    }
                     this.stops.Add(newStop);
                 });
             }
-        }
+        }*/
     }
 }
