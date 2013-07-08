@@ -257,124 +257,121 @@ namespace TestApp
             }
         }
 
-        private void ReadCallback(IAsyncResult asynchronousResult)
+        private string ProcessCallBack(IAsyncResult asynchronousResult)
         {
             HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
-            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
-            using (StreamReader streamReader1 = new StreamReader(response.GetResponseStream()))
+            HttpWebResponse response;
+            try
             {
-                string resultString = streamReader1.ReadToEnd();
-                var agencyroot = JsonConvert.DeserializeObject<AgencyRoot>(resultString);
-
-                //List<AgencyViewModel> retrievedAgencies;
-                Deployment.Current.Dispatcher.BeginInvoke(delegate
-                {
-                    foreach (var agency in agencyroot.data)
-                    {
-                        //Console.WriteLine(agency.short_name + ":" + agency.long_name + '(' + agency.agency_id + ')');
-
-                        //retrievedAgencies.Add(new AgencyViewModel() { AgencyName = agency.long_name });
-                        this.agencies.Add(new AgencyViewModel()
-                        { 
-                            AgencyName = agency.long_name,
-                            AgencyShortName = agency.short_name,
-                            IsSelected = false,
-                            AgencyID = agency.agency_id
-                        });
-                    }
-                });
+                response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
             }
+            catch (System.Net.WebException wb)
+            {
+                MessageBox.Show("Transloc API returned " + wb.Message);
+                return null;
+            }
+            StreamReader streamReader = new StreamReader(response.GetResponseStream());
+            return streamReader.ReadToEnd();
+        }
+
+        private void ReadCallback(IAsyncResult asynchronousResult)
+        {
+            string resultString = ProcessCallBack(asynchronousResult);
+            var agencyroot = JsonConvert.DeserializeObject<AgencyRoot>(resultString);
+
+            //List<AgencyViewModel> retrievedAgencies;
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            {
+                foreach (var agency in agencyroot.data)
+                {
+                    //Console.WriteLine(agency.short_name + ":" + agency.long_name + '(' + agency.agency_id + ')');
+
+                    //retrievedAgencies.Add(new AgencyViewModel() { AgencyName = agency.long_name });
+                    this.agencies.Add(new AgencyViewModel()
+                    { 
+                        AgencyName = agency.long_name,
+                        AgencyShortName = agency.short_name,
+                        IsSelected = false,
+                        AgencyID = agency.agency_id
+                    });
+                }
+            });
         }
 
         private void ReadRoutesCallback(IAsyncResult asynchronousResult)
         {
-            HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
-            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
-            using (StreamReader streamReader1 = new StreamReader(response.GetResponseStream()))
-            {
-                string resultString = streamReader1.ReadToEnd();
-                var routeroot = JsonConvert.DeserializeObject<RouteRoot>(resultString);
+            string resultString = ProcessCallBack(asynchronousResult);
+            var routeroot = JsonConvert.DeserializeObject<RouteRoot>(resultString);
 
-                Deployment.Current.Dispatcher.BeginInvoke(delegate
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            {
+                foreach (var agency in routeroot.data)
                 {
-                    foreach (var agency in routeroot.data)
+                    foreach (var route in agency.Value)
                     {
-                        foreach (var route in agency.Value)
+                        if (route.is_active == true)
                         {
-                            if (route.is_active == true)
+                            this.routes.Add(new RouteViewModel()
                             {
-                                this.routes.Add(new RouteViewModel()
-                                {
-                                    RouteName = route.long_name,
-                                    RouteShortName = route.short_name,
-                                    IsSelected = false,
-                                    AgencyID = route.agency_id,
-                                    RouteID = route.route_id,
-                                    TextColor = "#" + route.color.ToUpper(),
-                                    Stops = route.stops
-                                });
-                                if (routeCache.ContainsKey(route.route_id) == false)
-                                {
-                                    routeCache.Add(route.route_id, route);
-                                }
+                                RouteName = route.long_name,
+                                RouteShortName = route.short_name,
+                                IsSelected = false,
+                                AgencyID = route.agency_id,
+                                RouteID = route.route_id,
+                                TextColor = "#" + route.color.ToUpper(),
+                                Stops = route.stops
+                            });
+                            if (routeCache.ContainsKey(route.route_id) == false)
+                            {
+                                routeCache.Add(route.route_id, route);
                             }
                         }
                     }
-                });
-            }
+                }
+            });
         }
 
         private void ReadStopsCallback(IAsyncResult asynchronousResult)
         {
-            HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
-            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
-            using (StreamReader streamReader1 = new StreamReader(response.GetResponseStream()))
+            string resultString = ProcessCallBack(asynchronousResult);
+            var stopsroot = JsonConvert.DeserializeObject<StopRoot>(resultString);
+            foreach (var stop in stopsroot.data)
             {
-                string resultString = streamReader1.ReadToEnd();
-                var stopsroot = JsonConvert.DeserializeObject<StopRoot>(resultString);
-                foreach (var stop in stopsroot.data)
+                if (stopCache.ContainsKey(stop.stop_id) == false)
                 {
-                    if (stopCache.ContainsKey(stop.stop_id) == false)
-                    {
-                        stopCache.Add(stop.stop_id, stop);
-                    }
+                    stopCache.Add(stop.stop_id, stop);
                 }
             }
         }
 
         private void ReadArrivalsCallback(IAsyncResult asynchronousResult)
         {
-            HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
-            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
-            using (StreamReader streamReader1 = new StreamReader(response.GetResponseStream()))
+            string resultString = ProcessCallBack(asynchronousResult);
+            var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
+            foreach (var stoparrival in arrivalsroot.data)
             {
-                string resultString = streamReader1.ReadToEnd();
-                var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
-                foreach (var stoparrival in arrivalsroot.data)
-                {
                  
-                    long stopID = stoparrival.stop_id;
-                    foreach (var arrival in stoparrival.arrivals)
-                    {
-                        string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
-                        string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
+                long stopID = stoparrival.stop_id;
+                foreach (var arrival in stoparrival.arrivals)
+                {
+                    string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
+                    string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
 
-                        if (arrivalCache.ContainsKey(stopID))
+                    if (arrivalCache.ContainsKey(stopID))
+                    {
+                        if ( (arrivalCache[stopID]).ContainsKey(routeName))
                         {
-                            if ( (arrivalCache[stopID]).ContainsKey(routeName))
-                            {
-                                (arrivalCache[stopID])[routeName] += ", " + arrivalTime;
-                            }
-                            else
-                            {
-                                (arrivalCache[stopID]).Add(routeName, arrivalTime);
-                            }
+                            (arrivalCache[stopID])[routeName] += ", " + arrivalTime;
                         }
                         else
                         {
-                            arrivalCache.Add(stopID,new Dictionary<string,string>());
                             (arrivalCache[stopID]).Add(routeName, arrivalTime);
                         }
+                    }
+                    else
+                    {
+                        arrivalCache.Add(stopID,new Dictionary<string,string>());
+                        (arrivalCache[stopID]).Add(routeName, arrivalTime);
                     }
                 }
             }
