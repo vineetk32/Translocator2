@@ -16,7 +16,48 @@ namespace TestApp
 {
     public class ArrivalInfo
     {
-        public string routeName, arrivalTimes, routeColor;
+        private string routeName, arrivalTimes, routeColor;
+        private List<DateTime> rawArrivalTimes;
+
+        public string RouteName
+        {
+            get
+            {
+                return routeName;
+            }
+            set
+            {
+                if (value != routeName)
+                    routeName = value;
+            }
+        }
+
+        public string ArrivalTimes
+        {
+            get
+            {
+                return arrivalTimes;
+            }
+            set
+            {
+                if (value != arrivalTimes)
+                    arrivalTimes = value;
+            }
+        }
+
+        public string RouteColor
+        {
+            get
+            {
+                return routeColor;
+            }
+            set
+            {
+                if (value != routeColor)
+                    routeColor = value;
+            }
+        }
+
     }
 
     public class StopViewModel : INotifyPropertyChanged
@@ -25,13 +66,13 @@ namespace TestApp
         private long _stopID;
         private List<int> _agencies;
         private List<long> _routes;
-        private Dictionary<string, string> _arrival_estimates;
+        private Dictionary<long,ArrivalInfo> _arrival_estimates;
 
         public StopViewModel()
         {
             _agencies = new List<int>();
             _routes = new List<long>();
-            _arrival_estimates = new Dictionary<string, string>();
+            _arrival_estimates = new Dictionary<long, ArrivalInfo>();
         }
 
         public List<int> Agencies
@@ -110,7 +151,7 @@ namespace TestApp
             }
         }
 
-        public Dictionary<string, string> ArrivalEstimates
+        public Dictionary<long, ArrivalInfo> ArrivalEstimates
         {
             get
             {

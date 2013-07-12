@@ -99,8 +99,8 @@
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
 
-                                                        <TextBlock Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" Text="{Binding Key}" Style="{StaticResource PhoneTextAccentStyle}"/>
-                                                        <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" Style="{StaticResource PhoneTextAccentStyle}"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" Text="{Binding Value.RouteName, Mode=OneWay}" Foreground="{Binding Value.RouteColor}" Style="{StaticResource PhoneTextSmallStyle}"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value.ArrivalTimes, Mode=OneWay}" Foreground="{Binding Value.RouteColor}" Style="{StaticResource PhoneTextSmallStyle}"/>
                                                     </Grid>
                                                 </StackPanel>
                                             </DataTemplate>

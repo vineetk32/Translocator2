@@ -39,7 +39,7 @@ public class Route
     public string color { get; set; }
     //public List<int> segments;
     public int agency_id { get; set; }
-    public string text_color { get; set; }
+    //public string text_color { get; set; }
     public string long_name { get; set; }
     //public string url { get; set; }
     public bool is_active { get; set; }
@@ -97,7 +97,7 @@ namespace TestApp
 
             this.routeCache = new Dictionary<long, Route>();
             this.stopCache = new Dictionary<long, Stop>();
-            this.arrivalCache = new Dictionary<long, Dictionary<string, string>>();
+            this.arrivalCache = new Dictionary<long, Dictionary<long,ArrivalInfo>>();
 
             this.selectedRoutes = new List<long>();
             this.selectedAgencies = new List<long>();
@@ -114,7 +114,7 @@ namespace TestApp
 
         public Dictionary<long,Route> routeCache;
         public Dictionary<long, Stop> stopCache;
-        public Dictionary<long, Dictionary<string, string>> arrivalCache;
+        public Dictionary<long, Dictionary<long, ArrivalInfo>> arrivalCache;
 
         public List<long> selectedRoutes;
         public List<long> selectedAgencies;
@@ -177,11 +177,37 @@ namespace TestApp
             {
                 agencies.Append(routeCache[routeID].agency_id.ToString() + ',');
             }
+            initArrivalCache();
             String uri = "http://api.transloc.com/1.2/arrival-estimates.json?agencies=" + agencies.ToString() + "&routes=" + string.Join(",", selectedRoutes);
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadArrivalsCallback), request);
         }
 
+        public void initArrivalCache()
+        {
+            //Set the arrival times of all routes at all stop to be --.
+            //TODO - be smarter about this.
+            arrivalCache.Clear();
+            ArrivalInfo arrivalInfo = new ArrivalInfo();
+            arrivalInfo.ArrivalTimes = "--";
+            foreach(long currRouteID in selectedRoutes)
+            {
+                foreach (long currStopID in routeCache[currRouteID].stops)
+                {
+                    arrivalInfo.RouteColor = '#' + routeCache[currRouteID].color;
+                    arrivalInfo.RouteName = routeCache[currRouteID].short_name + " - " + routeCache[currRouteID].long_name;
+                    if (arrivalCache.ContainsKey(currStopID))
+                    {
+                        arrivalCache[currStopID].Add(currRouteID,arrivalInfo);
+                    }
+                    else
+                    {
+                        arrivalCache.Add(currStopID,new Dictionary<long,ArrivalInfo>());
+                        arrivalCache[currStopID].Add(currRouteID,arrivalInfo);
+                    }
+                }
+            }
+        }
 
         public void addArrivalsForRoute(string routeName)
         {
@@ -210,20 +236,14 @@ namespace TestApp
                 if (arrivalCache.ContainsKey(stopID))
                 {
                     newStop.ArrivalEstimates = arrivalCache[stopID];
-                }
-                else
-                {
-                    newStop.ArrivalEstimates = new Dictionary<string, string>();
-                }
-                //Add the stop only if has any arrivals.
-                //TODO - add the stop, and no arrivals instead later.
-                if (newStop.ArrivalEstimates.Count > 0)
-                {
+                    //Add the stop only if has any arrivals.
+                    //TODO - add the stop, and no arrivals instead later.
                     Deployment.Current.Dispatcher.BeginInvoke(delegate
                     {
                         this.stops.Add(newStop);
                     });
                 }
+
             }
         }
 
@@ -348,31 +368,41 @@ namespace TestApp
         {
             string resultString = ProcessCallBack(asynchronousResult);
             var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
+
             foreach (var stoparrival in arrivalsroot.data)
             {
                  
                 long stopID = stoparrival.stop_id;
-                foreach (var arrival in stoparrival.arrivals)
+                foreach (Arrival arrival in stoparrival.arrivals)
                 {
                     string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
                     string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
+                    long routeID = arrival.route_id;
 
-                    if (arrivalCache.ContainsKey(stopID))
-                    {
-                        if ( (arrivalCache[stopID]).ContainsKey(routeName))
+                    //if (arrivalCache.ContainsKey(stopID))
+                    //{
+                        if ( (arrivalCache[stopID][routeID].ArrivalTimes != "--"))
                         {
-                            (arrivalCache[stopID])[routeName] += ", " + arrivalTime;
+                            (arrivalCache[stopID])[routeID].ArrivalTimes += ", " + arrivalTime;
                         }
                         else
                         {
-                            (arrivalCache[stopID]).Add(routeName, arrivalTime);
+                            ArrivalInfo arrivalInfo = new ArrivalInfo();
+                            arrivalInfo.RouteName = routeName;
+                            arrivalInfo.RouteColor = '#' + routeCache[routeID].color;
+                            arrivalInfo.ArrivalTimes = arrivalTime;
+                            (arrivalCache[stopID]).Add(routeID, arrivalInfo);
                         }
-                    }
-                    else
+                    //}
+                    /*else
                     {
-                        arrivalCache.Add(stopID,new Dictionary<string,string>());
-                        (arrivalCache[stopID]).Add(routeName, arrivalTime);
-                    }
+                        arrivalCache.Add(stopID,new Dictionary<long,ArrivalInfo>());
+                        arrivalInfo.RouteName = routeName;
+                        arrivalInfo.RouteColor = '#' + routeCache[routeID].color;
+                        arrivalInfo.ArrivalTimes = arrivalTime;
+                        (arrivalCache[stopID]).Add(routeID, arrivalInfo);
+
+                    }*/
                 }
             }
             /*StringBuilder contents = new StringBuilder();
