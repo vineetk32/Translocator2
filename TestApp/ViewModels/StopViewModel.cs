@@ -17,7 +17,7 @@ namespace TestApp
     public class ArrivalInfo
     {
         private string routeName, arrivalTimes, routeColor;
-        private List<DateTime> rawArrivalTimes;
+        //private List<DateTime> rawArrivalTimes;
 
         public string RouteName
         {

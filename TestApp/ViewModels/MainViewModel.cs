@@ -45,6 +45,8 @@ public class Route
     public bool is_active { get; set; }
     //public string type { get; set; }
     public List<long> stops { get; set; }
+    //segments is actually a list of a tuple of segment_id and direction in 1.2
+    public List<long> segments { get; set; }
 }
 
 public class StopRoot
@@ -84,6 +86,69 @@ public class Arrival
     public string arrival_at;
 }
 
+public class SegmentRoot
+{
+    public SegmentRoot() { data = new Dictionary<long, string>(); }
+    public Dictionary<long, string> data;
+}
+
+public static class Util
+{
+    //Credits - StackOverflow (http://goo.gl/gZGIV)
+
+    public static Collection<Double> decodePolyline(string polyline)
+    {
+        if (polyline == null || polyline == "") return null;
+
+        char[] polylinechars = polyline.ToCharArray();
+        int index = 0;
+        Collection<Double> points = new Collection<Double>();
+        int currentLat = 0;
+        int currentLng = 0;
+        int next5bits;
+        int sum;
+        int shifter;
+
+        while (index < polylinechars.Length)
+        {
+            // calculate next latitude
+            sum = 0;
+            shifter = 0;
+            do
+            {
+                next5bits = (int)polylinechars[index++] - 63;
+                sum |= (next5bits & 31) << shifter;
+                shifter += 5;
+            } while (next5bits >= 32 && index < polylinechars.Length);
+
+            if (index >= polylinechars.Length)
+                break;
+
+            currentLat += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
+
+            //calculate next longitude
+            sum = 0;
+            shifter = 0;
+            do
+            {
+                next5bits = (int)polylinechars[index++] - 63;
+                sum |= (next5bits & 31) << shifter;
+                shifter += 5;
+            } while (next5bits >= 32 && index < polylinechars.Length);
+
+            if (index >= polylinechars.Length && next5bits >= 32)
+                break;
+
+            currentLng += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
+
+            points.Add(Convert.ToDouble(currentLat) / 100000.0);
+            points.Add(Convert.ToDouble(currentLng) / 100000.0);
+        }
+
+        return points;
+    }
+}
+
 namespace TestApp
 {
     public class MainViewModel : INotifyPropertyChanged
@@ -97,14 +162,16 @@ namespace TestApp
 
             this.routeCache = new Dictionary<long, Route>();
             this.stopCache = new Dictionary<long, Stop>();
-            this.arrivalCache = new Dictionary<long, Dictionary<long,ArrivalInfo>>();
+            this.arrivalCache = new Dictionary<long, Dictionary<long, ArrivalInfo>>();
+            this.segmentCache = new Dictionary<long,string>();
 
             this.selectedRoutes = new List<long>();
             this.selectedAgencies = new List<long>();
-            /*dt = new System.Windows.Threading.DispatcherTimer();
+
+            dt = new System.Windows.Threading.DispatcherTimer();
             dt.Interval = new TimeSpan(0, 0, 0, 5);
             dt.Tick += new EventHandler(dt_Tick);
-            dt.Start();*/
+            dt.Start();
         }
 
         public ObservableCollection<AgencyViewModel> agencies { get; private set; }
@@ -112,19 +179,23 @@ namespace TestApp
         public ObservableCollection<StopViewModel> stops { get; private set; }
         public ObservableCollection<String> selectedRoutesNames { get; private set; }
 
-        public Dictionary<long,Route> routeCache;
+        public Dictionary<long, Route> routeCache;
         public Dictionary<long, Stop> stopCache;
         public Dictionary<long, Dictionary<long, ArrivalInfo>> arrivalCache;
+        public Dictionary<long, string> segmentCache;
 
         public List<long> selectedRoutes;
         public List<long> selectedAgencies;
 
-        /*public System.Windows.Threading.DispatcherTimer dt;
+        public System.Windows.Threading.DispatcherTimer dt;
 
         public void dt_Tick(object sender, EventArgs r)
         {
-            MessageBox.Show("Timer function");
-        }*/
+            if (this.selectedRoutes.Count > 0)
+            {
+                cacheAllArrivals();
+            }
+        }
 
         public bool IsDataLoaded
         {
@@ -148,7 +219,9 @@ namespace TestApp
 
         public void addRoutes(int agencyID)
         {
-            String uri = "http://api.transloc.com/1.2/routes.json?agencies=" + agencyID;
+            //String uri = "http://api.transloc.com/1.2/routes.json?agencies=" + agencyID;
+            //1.1 has easier segment processing.
+            String uri = "http://api.transloc.com/1.1/routes.json?agencies=" + agencyID;
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadRoutesCallback), request);
         }
@@ -169,41 +242,33 @@ namespace TestApp
 
         public void cacheAllArrivals()
         {
-            StringBuilder agencies, routes;
-            agencies = new StringBuilder();
-            routes = new StringBuilder();
-
-            foreach (int routeID in selectedRoutes)
-            {
-                agencies.Append(routeCache[routeID].agency_id.ToString() + ',');
-            }
             initArrivalCache();
-            String uri = "http://api.transloc.com/1.2/arrival-estimates.json?agencies=" + agencies.ToString() + "&routes=" + string.Join(",", selectedRoutes);
+            String uri = "http://api.transloc.com/1.2/arrival-estimates.json?agencies=" + string.Join(",", selectedAgencies) + "&routes=" + string.Join(",", selectedRoutes);
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadArrivalsCallback), request);
         }
 
         public void initArrivalCache()
         {
-            //Set the arrival times of all routes at all stop to be --.
+            //Set the arrival times of all routes at all stops to be --.
             //TODO - be smarter about this.
             arrivalCache.Clear();
-            ArrivalInfo arrivalInfo = new ArrivalInfo();
-            arrivalInfo.ArrivalTimes = "--";
-            foreach(long currRouteID in selectedRoutes)
+            foreach (long currRouteID in selectedRoutes)
             {
                 foreach (long currStopID in routeCache[currRouteID].stops)
                 {
+                    ArrivalInfo arrivalInfo = new ArrivalInfo();
+                    arrivalInfo.ArrivalTimes = "--";
                     arrivalInfo.RouteColor = '#' + routeCache[currRouteID].color;
                     arrivalInfo.RouteName = routeCache[currRouteID].short_name + " - " + routeCache[currRouteID].long_name;
                     if (arrivalCache.ContainsKey(currStopID))
                     {
-                        arrivalCache[currStopID].Add(currRouteID,arrivalInfo);
+                        arrivalCache[currStopID].Add(currRouteID, arrivalInfo);
                     }
                     else
                     {
-                        arrivalCache.Add(currStopID,new Dictionary<long,ArrivalInfo>());
-                        arrivalCache[currStopID].Add(currRouteID,arrivalInfo);
+                        arrivalCache.Add(currStopID, new Dictionary<long, ArrivalInfo>());
+                        arrivalCache[currStopID].Add(currRouteID, arrivalInfo);
                     }
                 }
             }
@@ -236,8 +301,6 @@ namespace TestApp
                 if (arrivalCache.ContainsKey(stopID))
                 {
                     newStop.ArrivalEstimates = arrivalCache[stopID];
-                    //Add the stop only if has any arrivals.
-                    //TODO - add the stop, and no arrivals instead later.
                     Deployment.Current.Dispatcher.BeginInvoke(delegate
                     {
                         this.stops.Add(newStop);
@@ -250,7 +313,7 @@ namespace TestApp
 
         public void removeRoutes(int agencyID)
         {
-            for (int i = this.routes.Count - 1; i >= 0 ; i-- )
+            for (int i = this.routes.Count - 1; i >= 0; i--)
             {
                 RouteViewModel item = this.routes[i];
                 if (this.routes[i].AgencyID == agencyID)
@@ -308,7 +371,7 @@ namespace TestApp
 
                     //retrievedAgencies.Add(new AgencyViewModel() { AgencyName = agency.long_name });
                     this.agencies.Add(new AgencyViewModel()
-                    { 
+                    {
                         AgencyName = agency.long_name,
                         AgencyShortName = agency.short_name,
                         IsSelected = false,
@@ -329,6 +392,7 @@ namespace TestApp
                 {
                     foreach (var route in agency.Value)
                     {
+                        route.is_active = true;
                         if (route.is_active == true)
                         {
                             this.routes.Add(new RouteViewModel()
@@ -368,41 +432,41 @@ namespace TestApp
         {
             string resultString = ProcessCallBack(asynchronousResult);
             var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
+            DateTime currTime = DateTime.Now;
 
             foreach (var stoparrival in arrivalsroot.data)
             {
-                 
                 long stopID = stoparrival.stop_id;
-                foreach (Arrival arrival in stoparrival.arrivals)
+                foreach (var arrival in stoparrival.arrivals)
                 {
-                    string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
+                    DateTime rawArrivalTime = DateTime.Parse(arrival.arrival_at);
+                    TimeSpan timeDiff = rawArrivalTime - currTime;
+
+                    //string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
+                    string arrivalTime;
+                    if (timeDiff.Minutes < 1)
+                    {
+                        arrivalTime = "<1 min";
+                    }
+                    else
+                    {
+                        arrivalTime = timeDiff.Minutes.ToString() + " mins";
+                    }
                     string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
                     long routeID = arrival.route_id;
 
-                    //if (arrivalCache.ContainsKey(stopID))
-                    //{
-                        if ( (arrivalCache[stopID][routeID].ArrivalTimes != "--"))
-                        {
-                            (arrivalCache[stopID])[routeID].ArrivalTimes += ", " + arrivalTime;
-                        }
-                        else
-                        {
-                            ArrivalInfo arrivalInfo = new ArrivalInfo();
-                            arrivalInfo.RouteName = routeName;
-                            arrivalInfo.RouteColor = '#' + routeCache[routeID].color;
-                            arrivalInfo.ArrivalTimes = arrivalTime;
-                            (arrivalCache[stopID]).Add(routeID, arrivalInfo);
-                        }
-                    //}
-                    /*else
+                    if (arrivalCache[stopID][routeID].ArrivalTimes != "--")
                     {
-                        arrivalCache.Add(stopID,new Dictionary<long,ArrivalInfo>());
+                        (arrivalCache[stopID])[routeID].ArrivalTimes += ", " + arrivalTime;
+                    }
+                    else
+                    {
+                        ArrivalInfo arrivalInfo = new ArrivalInfo();
                         arrivalInfo.RouteName = routeName;
                         arrivalInfo.RouteColor = '#' + routeCache[routeID].color;
                         arrivalInfo.ArrivalTimes = arrivalTime;
-                        (arrivalCache[stopID]).Add(routeID, arrivalInfo);
-
-                    }*/
+                        (arrivalCache[stopID])[routeID] = arrivalInfo;
+                    }
                 }
             }
             /*StringBuilder contents = new StringBuilder();
@@ -416,7 +480,7 @@ namespace TestApp
             }
             cleanUpStops(); */
             //TODO - remove this bullshit way of doing this, and use await() instead.
-            if (selectedRoutesNames.Count > 0)
+            if (selectedRoutesNames.Count > 0 && this.stops.Count == 0)
             {
                 string route = selectedRoutesNames[0];
                 addArrivalsForRoute(route);
@@ -477,5 +541,32 @@ namespace TestApp
                 });
             }
         }*/
+
+        public bool drawMapInfo()
+        {
+
+        }
+
+        public void addSegments()
+        {
+            String uri = "http://api.transloc.com/1.2/segments.json?agencies=" + string.Join(",", selectedAgencies) + "&routes=" + string.Join(",", selectedRoutes);
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadSegmentsCallback), request);
+        }
+
+
+        private void ReadSegmentsCallback(IAsyncResult asynchronousResult)
+        {
+            string resultString = ProcessCallBack(asynchronousResult);
+            var segmentsroot = JsonConvert.DeserializeObject<SegmentRoot>(resultString);
+            foreach (var segment in segmentsroot.data.Keys)
+            {
+                if (segmentCache.ContainsKey(segment) == false)
+                {
+                    segmentCache.Add(segment, segmentsroot.data[segment]);
+                }
+            }
+        }
+
     }
 }

@@ -8,6 +8,7 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:map="clr-namespace:Microsoft.Phone.Controls.Maps;assembly=Microsoft.Phone.Controls.Maps"
     
     
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
@@ -22,11 +23,11 @@
         <!--Pivot Control-->
         <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" SelectionChanged="ParentPivot_SelectionChanged">
 
-            <!-- <controls:PivotItem Header="map">
-                <map:Map CredentialsProvider="AndTilJO3zG0iba272rBy5fJGmw_ulvigQDXiqCKbSzQTzWt00oF-AV_7vJ4quno" Name="myMap"/>
+           <!-- <controls:PivotItem Header="map" x:Name="MapsPivot">
+                <map:Map CredentialsProvider="AndTilJO3zG0iba272rBy5fJGmw_ulvigQDXiqCKbSzQTzWt00oF-AV_7vJ4quno" Name="myMap" Mode="Road"/>
             </controls:PivotItem> -->
 
-            <controls:PivotItem Header="agencies">
+            <controls:PivotItem Header="agencies" x:Name="AgenciesPivot">
                 <ListBox x:Name="FirstListBox" Margin="0,0,-12,0" ItemsSource="{Binding Path=agencies, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

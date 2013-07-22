@@ -10,12 +10,17 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
+using Microsoft.Phone.Controls.Maps;
+using System.Device.Location;
 
 namespace TestApp
 {
     public partial class MainPage : PhoneApplicationPage
     {
         // Constructor
+        GeoCoordinateWatcher locationWatcher;
+        bool isMapInitialized;
+
         public MainPage()
         {
             InitializeComponent();
@@ -24,9 +29,24 @@ namespace TestApp
             ParentPivot.Items.Remove(RoutesPivot);
             ParentPivot.Items.Remove(StopsPivot);
 
+            /*locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+            locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
+            myMap.ZoomBarVisibility = Visibility.Visible;
+            locationWatcher.Start();*/
+
+
             DataContext = App.ViewModel;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
         }
+        /*
+        public void locationWatcher_getPosition(object sender, GeoPositionChangedEventArgs<GeoCoordinate> newLoc)
+        {
+            Pushpin pin = new Pushpin();
+            pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
+            myMap.Children.Add(pin);
+            myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 16.0);
+        }*/
+
 
         // Load data for the ViewModel Items
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -53,6 +73,13 @@ namespace TestApp
             {
                 App.ViewModel.cacheAllArrivals();
             }
+            else if (ParentPivot.SelectedItem == AgenciesPivot)
+            {
+                if (App.ViewModel.selectedRoutes.Count > 0)
+                {
+                    App.ViewModel.drawMapInfo();
+                }
+           }
         }
 
         public void ShowRoutes()
@@ -122,8 +149,5 @@ namespace TestApp
                 HideStops();
             }
         }
-
-
-
-    }
+   }
 }
