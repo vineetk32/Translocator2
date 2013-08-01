@@ -544,7 +544,8 @@ namespace TestApp
 
         public bool drawMapInfo()
         {
-
+            //TODO;
+            return true;
         }
 
         public void addSegments()
