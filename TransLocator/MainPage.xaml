@@ -21,11 +21,11 @@
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
-        <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" SelectionChanged="ParentPivot_SelectionChanged">
+        <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" LoadedPivotItem="ParentPivot_LoadedPivotItem">
 
-           <!-- <controls:PivotItem Header="map" x:Name="MapsPivot">
+            <controls:PivotItem Header="map" x:Name="MapsPivot" >
                 <map:Map CredentialsProvider="AndTilJO3zG0iba272rBy5fJGmw_ulvigQDXiqCKbSzQTzWt00oF-AV_7vJ4quno" Name="myMap" Mode="Road"/>
-            </controls:PivotItem> -->
+            </controls:PivotItem>
 
             <controls:PivotItem Header="agencies" x:Name="AgenciesPivot">
                 <ListBox x:Name="FirstListBox" Margin="0,0,-12,0" ItemsSource="{Binding Path=agencies, Mode=TwoWay}">
@@ -82,7 +82,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <toolkit:ListPicker Grid.Row="0" x:Name="RouteCombo" Header="Selected Route" ItemsSource="{Binding selectedRoutesNames}" Margin="20" SelectionChanged="ListPicker_SelectionChanged"/>
+                    <toolkit:ListPicker Grid.Row="0" x:Name="RouteCombo" Header="Selected Route" ItemsSource="{Binding selectedRoutesNames}" Margin="20" SelectionChanged="RouteList_SelectionChanged"/>
 
                     <ListBox Grid.Row="1" x:Name="StopsListBox" Margin="0,0,-12,0" ItemsSource="{Binding stops}" CacheMode="BitmapCache">
                     <ListBox.ItemTemplate>

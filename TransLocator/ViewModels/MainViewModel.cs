@@ -7,7 +7,17 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
+using System.Windows.Shapes;
+using Microsoft.Phone.Controls;
+using Microsoft.Phone.Controls.Maps;
+using System.Device.Location;
 
+
+public class Location
+{
+    public double lat;
+    public double lng;
+}
 
 public class AgencyRoot
 {
@@ -61,7 +71,7 @@ public class Stop
     public string code;
     public List<int> agency_ids;
     //public string location_type;
-    ///location is a tuple of float lat,float lng
+    public Location location;
     public long stop_id;
     public List<long> routes;
     public string name;
@@ -92,62 +102,52 @@ public class SegmentRoot
     public Dictionary<long, string> data;
 }
 
-public static class Util
+public class ArrivalEstimate
 {
-    //Credits - StackOverflow (http://goo.gl/gZGIV)
-
-    public static Collection<Double> decodePolyline(string polyline)
-    {
-        if (polyline == null || polyline == "") return null;
-
-        char[] polylinechars = polyline.ToCharArray();
-        int index = 0;
-        Collection<Double> points = new Collection<Double>();
-        int currentLat = 0;
-        int currentLng = 0;
-        int next5bits;
-        int sum;
-        int shifter;
-
-        while (index < polylinechars.Length)
-        {
-            // calculate next latitude
-            sum = 0;
-            shifter = 0;
-            do
-            {
-                next5bits = (int)polylinechars[index++] - 63;
-                sum |= (next5bits & 31) << shifter;
-                shifter += 5;
-            } while (next5bits >= 32 && index < polylinechars.Length);
-
-            if (index >= polylinechars.Length)
-                break;
-
-            currentLat += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
-
-            //calculate next longitude
-            sum = 0;
-            shifter = 0;
-            do
-            {
-                next5bits = (int)polylinechars[index++] - 63;
-                sum |= (next5bits & 31) << shifter;
-                shifter += 5;
-            } while (next5bits >= 32 && index < polylinechars.Length);
-
-            if (index >= polylinechars.Length && next5bits >= 32)
-                break;
-
-            currentLng += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
-
-            points.Add(Convert.ToDouble(currentLat) / 100000.0);
-            points.Add(Convert.ToDouble(currentLng) / 100000.0);
-        }
-
-        return points;
-    }
+    public long route_id;
+    public string arrival_at;
+    public long stop_id;
 }
+
+public class Vehicle : INotifyPropertyChanged
+{
+    public Vehicle() { arrival_estimates = new List<ArrivalEstimate>(); }
+    public long vehicle_id;
+    public long route_id;
+
+    public List<ArrivalEstimate> arrival_estimates;
+    public Location location;
+
+    public GeoCoordinate VehicleLocation
+    {
+        get
+        {
+            return new GeoCoordinate(location.lat, location.lng);
+        }
+        set
+        {
+            NotifyPropertyChanged("VehicleLocation");
+        }
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    private void NotifyPropertyChanged(String propertyName)
+    {
+        PropertyChangedEventHandler handler = PropertyChanged;
+        if (null != handler)
+        {
+            handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+}
+
+public class VehicleRoot
+{
+    public VehicleRoot() { data = new Dictionary<long, List<Vehicle>>(); }
+    public Dictionary<long, List<Vehicle>> data;
+}
+
 
 namespace TestApp
 {
@@ -164,6 +164,7 @@ namespace TestApp
             this.stopCache = new Dictionary<long, Stop>();
             this.arrivalCache = new Dictionary<long, Dictionary<long, ArrivalInfo>>();
             this.segmentCache = new Dictionary<long,string>();
+            this.vehicleCache = new Dictionary<long, Vehicle>();
 
             this.selectedRoutes = new List<long>();
             this.selectedAgencies = new List<long>();
@@ -183,6 +184,7 @@ namespace TestApp
         public Dictionary<long, Stop> stopCache;
         public Dictionary<long, Dictionary<long, ArrivalInfo>> arrivalCache;
         public Dictionary<long, string> segmentCache;
+        public Dictionary<long, Vehicle> vehicleCache;
 
         public List<long> selectedRoutes;
         public List<long> selectedAgencies;
@@ -455,7 +457,7 @@ namespace TestApp
                     string routeName = routeCache[arrival.route_id].short_name + " - " + routeCache[arrival.route_id].long_name;
                     long routeID = arrival.route_id;
 
-                    if (arrivalCache[stopID][routeID].ArrivalTimes != "--")
+                    if (arrivalCache[stopID][routeID].ArrivalTimes != "--") 
                     {
                         (arrivalCache[stopID])[routeID].ArrivalTimes += ", " + arrivalTime;
                     }
@@ -542,15 +544,9 @@ namespace TestApp
             }
         }*/
 
-        public bool drawMapInfo()
+        public void addSegments(long AgencyID, long RouteID)
         {
-            //TODO;
-            return true;
-        }
-
-        public void addSegments()
-        {
-            String uri = "http://api.transloc.com/1.2/segments.json?agencies=" + string.Join(",", selectedAgencies) + "&routes=" + string.Join(",", selectedRoutes);
+            String uri = "http://api.transloc.com/1.2/segments.json?agencies=" + AgencyID.ToString() + "&routes=" + RouteID.ToString();
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadSegmentsCallback), request);
         }
@@ -569,5 +565,27 @@ namespace TestApp
             }
         }
 
+        public void addVehicles(long AgencyID, long RouteID)
+        {
+            String uri = "http://api.transloc.com/1.2/vehicles.json?agencies=" + AgencyID.ToString() + "&routes=" + RouteID.ToString();
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadVehiclesCallback), request);
+        }
+
+        private void ReadVehiclesCallback(IAsyncResult asynchronousResult)
+        {
+            string resultString = ProcessCallBack(asynchronousResult);
+            var vehiclesroot = JsonConvert.DeserializeObject<VehicleRoot>(resultString);
+            foreach (var agencyID in vehiclesroot.data.Keys)
+            {
+                foreach (var vehicle in vehiclesroot.data[agencyID])
+                {
+                    if (vehicleCache.ContainsKey(vehicle.vehicle_id) == false)
+                    {
+                        vehicleCache.Add(vehicle.vehicle_id, vehicle);
+                    }
+                }
+            }
+        }
     }
 }

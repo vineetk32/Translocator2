@@ -19,7 +19,7 @@ namespace TestApp
     {
         // Constructor
         GeoCoordinateWatcher locationWatcher;
-        bool isMapInitialized;
+        bool isMapUptoDate;
 
         public MainPage()
         {
@@ -28,24 +28,28 @@ namespace TestApp
             // Set the data context of the listbox control to the sample data
             ParentPivot.Items.Remove(RoutesPivot);
             ParentPivot.Items.Remove(StopsPivot);
+            ParentPivot.Items.Remove(MapsPivot);
 
-            /*locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+            isMapUptoDate = false;
+            locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
             locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
             myMap.ZoomBarVisibility = Visibility.Visible;
-            locationWatcher.Start();*/
+            locationWatcher.Start();
 
 
             DataContext = App.ViewModel;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
         }
-        /*
+        
         public void locationWatcher_getPosition(object sender, GeoPositionChangedEventArgs<GeoCoordinate> newLoc)
         {
             Pushpin pin = new Pushpin();
-            pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
+            //pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
+            pin.Location = new GeoCoordinate(35.76733,-78.69568);
             myMap.Children.Add(pin);
-            myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 16.0);
-        }*/
+            //myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 16.0);
+            myMap.SetView(new GeoCoordinate(35.76733, -78.69568), 16.0);
+        }
 
 
         // Load data for the ViewModel Items
@@ -57,7 +61,7 @@ namespace TestApp
             }
         }
 
-        private void ListPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void RouteList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ParentPivot.SelectedItem == StopsPivot)
             {
@@ -67,20 +71,24 @@ namespace TestApp
             }
         }
 
-        private void ParentPivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public void ShowMaps()
         {
-            if (ParentPivot.SelectedItem == StopsPivot)
+            //TODO - use a bool instead
+            if (ParentPivot.Items.Contains(MapsPivot) == false)
             {
-                App.ViewModel.cacheAllArrivals();
+                ParentPivot.Items.Add(MapsPivot);
             }
-            else if (ParentPivot.SelectedItem == AgenciesPivot)
-            {
-                if (App.ViewModel.selectedRoutes.Count > 0)
-                {
-                    App.ViewModel.drawMapInfo();
-                }
-           }
         }
+
+        public void HideMaps()
+        {
+            //TODO - use a bool instead
+            if (ParentPivot.Items.Contains(MapsPivot) == true)
+            {
+                ParentPivot.Items.Remove(MapsPivot);
+            }
+        }
+
 
         public void ShowRoutes()
         {
@@ -97,6 +105,8 @@ namespace TestApp
             if (ParentPivot.Items.Contains(RoutesPivot) == true)
             {
                 ParentPivot.Items.Remove(RoutesPivot);
+                HideStops();
+                HideMaps();
             }
         }
 
@@ -124,6 +134,7 @@ namespace TestApp
             {
                 ShowRoutes();
             }
+            isMapUptoDate = false;
         }
 
         private void chkAgency_Unchecked(object sender, RoutedEventArgs e)
@@ -132,6 +143,7 @@ namespace TestApp
             {
                 HideRoutes();
             }
+            isMapUptoDate = false;
         }
 
         private void chkRoute_Checked(object sender, RoutedEventArgs e)
@@ -139,7 +151,9 @@ namespace TestApp
             if (App.ViewModel.selectedRoutes.Count == 0)
             {
                 ShowStops();
+                ShowMaps();
             }
+            isMapUptoDate = false;
         }
 
         private void chkRoute_Unchecked(object sender, RoutedEventArgs e)
@@ -147,7 +161,135 @@ namespace TestApp
             if (App.ViewModel.selectedRoutes.Count == 1)
             {
                 HideStops();
+                HideMaps();
             }
+            isMapUptoDate = false;
+        }
+
+        private LocationCollection DecodePolylinePoints(string encodedPoints)
+        {
+            if (encodedPoints == null || encodedPoints == "") return null;
+            LocationCollection poly = new LocationCollection();
+            char[] polylinechars = encodedPoints.ToCharArray();
+            int index = 0;
+
+            int currentLat = 0;
+            int currentLng = 0;
+            int next5bits;
+            int sum;
+            int shifter;
+
+            try
+            {
+                while (index < polylinechars.Length)
+                {
+                    // calculate next latitude
+                    sum = 0;
+                    shifter = 0;
+                    do
+                    {
+                        next5bits = (int)polylinechars[index++] - 63;
+                        sum |= (next5bits & 31) << shifter;
+                        shifter += 5;
+                    } while (next5bits >= 32 && index < polylinechars.Length);
+
+                    if (index >= polylinechars.Length)
+                        break;
+
+                    currentLat += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
+
+                    //calculate next longitude
+                    sum = 0;
+                    shifter = 0;
+                    do
+                    {
+                        next5bits = (int)polylinechars[index++] - 63;
+                        sum |= (next5bits & 31) << shifter;
+                        shifter += 5;
+                    } while (next5bits >= 32 && index < polylinechars.Length);
+
+                    if (index >= polylinechars.Length && next5bits >= 32)
+                        break;
+
+                    currentLng += (sum & 1) == 1 ? ~(sum >> 1) : (sum >> 1);
+                    GeoCoordinate p = new GeoCoordinate();
+                    p.Latitude = Convert.ToDouble(currentLat) / 100000.0;
+                    p.Longitude = Convert.ToDouble(currentLng) / 100000.0;
+
+                    poly.Add(p);
+                }
+            }
+            catch (Exception ex)
+            {
+                // log it
+            }
+            return poly;
+        }
+
+
+        private void addSegmentToMap(string segment,string routeColor)
+        {
+            LocationCollection coordinates = DecodePolylinePoints(segment);
+            MapPolyline myPoly = new MapPolyline();
+
+            myPoly.Stroke = stringtoBrush(routeColor);
+            myPoly.StrokeThickness = 2;
+            myPoly.Opacity = 0.8;
+
+            myPoly.Locations = coordinates;
+            myMap.Children.Add(myPoly);
+        }
+
+        private void addStopToMap(Stop currStop)
+        {
+            MapLayer stopCirle = new MapLayer();
+
+            Pushpin pin = new Pushpin() { Location = new GeoCoordinate(currStop.location.lat, currStop.location.lng) };
+            pin.Width = 50;
+            pin.Height = 50;
+            pin.Template = (ControlTemplate)App.Current.Resources["StopPin"];
+            myMap.Children.Add(pin);
+        }
+
+        private SolidColorBrush stringtoBrush(string colour)
+        {
+            return new SolidColorBrush(
+            Color.FromArgb(
+                Convert.ToByte("FF", 16),
+                Convert.ToByte(colour.Substring(0, 2), 16),
+                Convert.ToByte(colour.Substring(2, 2), 16),
+                Convert.ToByte(colour.Substring(4, 2), 16)
+            )
+            );
+        }
+        
+
+        private void ParentPivot_LoadedPivotItem(object sender, PivotItemEventArgs e)
+        {
+            if (ParentPivot.SelectedItem == StopsPivot)
+            {
+                App.ViewModel.cacheAllArrivals();
+            }
+            else if (ParentPivot.SelectedItem == MapsPivot)
+            {
+                if (isMapUptoDate == false)
+                {
+                    foreach (long routeID in App.ViewModel.selectedRoutes)
+                    {
+                        foreach (long segmentID in App.ViewModel.routeCache[routeID].segments)
+                        {
+                            addSegmentToMap(App.ViewModel.segmentCache[segmentID], App.ViewModel.routeCache[routeID].color);
+                        }
+                    }
+                    isMapUptoDate = true;
+
+                    foreach (Stop currStop in App.ViewModel.stopCache.Values)
+                    {
+                        addStopToMap(currStop);
+                    }
+                }
+            }
+
         }
    }
 }

@@ -124,6 +124,9 @@ namespace TestApp
                     {
                         App.ViewModel.addRoute(this.RouteID,this.Stops);
                         //App.ViewModel.cacheArrivals(this.RouteID);
+                        App.ViewModel.addSegments(this.AgencyID, this.RouteID);
+                        App.ViewModel.addVehicles(this.AgencyID, this.RouteID);
+
                     }
                     else
                     {
