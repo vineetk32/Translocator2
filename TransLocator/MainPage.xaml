@@ -24,7 +24,17 @@
         <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" LoadedPivotItem="ParentPivot_LoadedPivotItem">
 
             <controls:PivotItem Header="map" x:Name="MapsPivot" >
-                <map:Map CredentialsProvider="AndTilJO3zG0iba272rBy5fJGmw_ulvigQDXiqCKbSzQTzWt00oF-AV_7vJ4quno" Name="myMap" Mode="Road"/>
+                <map:Map CredentialsProvider="AndTilJO3zG0iba272rBy5fJGmw_ulvigQDXiqCKbSzQTzWt00oF-AV_7vJ4quno" Name="myMap" Mode="Road">
+                    <map:MapItemsControl ItemsSource="{Binding currVehicles}">
+                        <map:MapItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <map:Pushpin Location="{Binding VehicleLocation}" 
+                                          Template="{StaticResource VehiclePin}">
+                                </map:Pushpin>
+                            </DataTemplate>
+                        </map:MapItemsControl.ItemTemplate>
+                    </map:MapItemsControl>
+                </map:Map>
             </controls:PivotItem>
 
             <controls:PivotItem Header="agencies" x:Name="AgenciesPivot">

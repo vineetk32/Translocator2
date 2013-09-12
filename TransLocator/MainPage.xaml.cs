@@ -45,10 +45,11 @@ namespace TestApp
         {
             Pushpin pin = new Pushpin();
             //pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
-            pin.Location = new GeoCoordinate(35.76733,-78.69568);
+            //pin.Location = new GeoCoordinate(35.76733,-78.69568);
+            pin.Template = (ControlTemplate)App.Current.Resources["MyLocationPin"];
             myMap.Children.Add(pin);
-            //myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 16.0);
-            myMap.SetView(new GeoCoordinate(35.76733, -78.69568), 16.0);
+            myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 16.0);
+            //myMap.SetView(new GeoCoordinate(35.76733, -78.69568), 16.0);
         }
 
 

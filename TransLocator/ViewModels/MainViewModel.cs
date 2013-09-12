@@ -117,6 +117,7 @@ public class Vehicle : INotifyPropertyChanged
 
     public List<ArrivalEstimate> arrival_estimates;
     public Location location;
+    public string _color;
 
     public GeoCoordinate VehicleLocation
     {
@@ -140,6 +141,22 @@ public class Vehicle : INotifyPropertyChanged
         }
     }
 
+    public String Color
+    {
+        get
+        {
+            return _color;
+        }
+        set
+        {
+            if (_color != value)
+            {
+                _color = value;
+                NotifyPropertyChanged("Color");
+            }
+        }
+    }
+
 }
 
 public class VehicleRoot
@@ -159,6 +176,7 @@ namespace TestApp
             this.routes = new ObservableCollection<RouteViewModel>();
             this.stops = new ObservableCollection<StopViewModel>();
             this.selectedRoutesNames = new ObservableCollection<string>();
+            this.currVehicles = new ObservableCollection<Vehicle>();
 
             this.routeCache = new Dictionary<long, Route>();
             this.stopCache = new Dictionary<long, Stop>();
@@ -179,6 +197,7 @@ namespace TestApp
         public ObservableCollection<RouteViewModel> routes { get; private set; }
         public ObservableCollection<StopViewModel> stops { get; private set; }
         public ObservableCollection<String> selectedRoutesNames { get; private set; }
+        public ObservableCollection<Vehicle> currVehicles { get; private set; }
 
         public Dictionary<long, Route> routeCache;
         public Dictionary<long, Stop> stopCache;
@@ -582,7 +601,16 @@ namespace TestApp
                 {
                     if (vehicleCache.ContainsKey(vehicle.vehicle_id) == false)
                     {
+                        vehicle.Color = '#' + routeCache[vehicle.route_id].color;
                         vehicleCache.Add(vehicle.vehicle_id, vehicle);
+
+                        /*if (selectedRoutes.Contains(vehicle.route_id))
+                        {}*/
+
+                        Deployment.Current.Dispatcher.BeginInvoke(delegate
+                        {
+                            this.currVehicles.Add(vehicle);
+                        });
                     }
                 }
             }
