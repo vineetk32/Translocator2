@@ -117,7 +117,7 @@ public class Vehicle : INotifyPropertyChanged
 
     public List<ArrivalEstimate> arrival_estimates;
     public Location location;
-    public string _color;
+    public string _color, _routeShortName;
 
     public GeoCoordinate VehicleLocation
     {
@@ -139,6 +139,23 @@ public class Vehicle : INotifyPropertyChanged
         {
             handler(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public String RouteShortName
+    {
+        get
+        {
+            return _routeShortName;
+        }
+        set
+        {
+            if (_routeShortName != value)
+            {
+                _routeShortName = value;
+                NotifyPropertyChanged("RouteShortName");
+            }
+        }
+
     }
 
     public String Color
@@ -182,7 +199,6 @@ namespace TestApp
             this.stopCache = new Dictionary<long, Stop>();
             this.arrivalCache = new Dictionary<long, Dictionary<long, ArrivalInfo>>();
             this.segmentCache = new Dictionary<long,string>();
-            this.vehicleCache = new Dictionary<long, Vehicle>();
 
             this.selectedRoutes = new List<long>();
             this.selectedAgencies = new List<long>();
@@ -203,7 +219,6 @@ namespace TestApp
         public Dictionary<long, Stop> stopCache;
         public Dictionary<long, Dictionary<long, ArrivalInfo>> arrivalCache;
         public Dictionary<long, string> segmentCache;
-        public Dictionary<long, Vehicle> vehicleCache;
 
         public List<long> selectedRoutes;
         public List<long> selectedAgencies;
@@ -215,6 +230,7 @@ namespace TestApp
             if (this.selectedRoutes.Count > 0)
             {
                 cacheAllArrivals();
+                cacheAllVehicles();
             }
         }
 
@@ -268,6 +284,15 @@ namespace TestApp
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.BeginGetResponse(new AsyncCallback(ReadArrivalsCallback), request);
         }
+
+        public void cacheAllVehicles()
+        {
+            String uri = "http://api.transloc.com/1.2/vehicles.json?agencies=" + string.Join(",", selectedAgencies) + "&routes=" + string.Join(",", selectedRoutes);
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadVehiclesCallback), request);
+        }
+
+        
 
         public void initArrivalCache()
         {
@@ -595,23 +620,26 @@ namespace TestApp
         {
             string resultString = ProcessCallBack(asynchronousResult);
             var vehiclesroot = JsonConvert.DeserializeObject<VehicleRoot>(resultString);
+
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            {
+                this.currVehicles.Clear();
+            });
+
             foreach (var agencyID in vehiclesroot.data.Keys)
             {
                 foreach (var vehicle in vehiclesroot.data[agencyID])
                 {
-                    if (vehicleCache.ContainsKey(vehicle.vehicle_id) == false)
+                    vehicle.Color = '#' + routeCache[vehicle.route_id].color;
+                    vehicle.RouteShortName = routeCache[vehicle.route_id].short_name;
+
+                    /*if (selectedRoutes.Contains(vehicle.route_id))
+                    {}*/
+
+                    Deployment.Current.Dispatcher.BeginInvoke(delegate
                     {
-                        vehicle.Color = '#' + routeCache[vehicle.route_id].color;
-                        vehicleCache.Add(vehicle.vehicle_id, vehicle);
-
-                        /*if (selectedRoutes.Contains(vehicle.route_id))
-                        {}*/
-
-                        Deployment.Current.Dispatcher.BeginInvoke(delegate
-                        {
-                            this.currVehicles.Add(vehicle);
-                        });
-                    }
+                        this.currVehicles.Add(vehicle);
+                    });
                 }
             }
         }

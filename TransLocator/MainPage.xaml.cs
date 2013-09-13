@@ -31,11 +31,13 @@ namespace TestApp
             ParentPivot.Items.Remove(MapsPivot);
 
             isMapUptoDate = false;
-            locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+            /*locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
             locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
-            myMap.ZoomBarVisibility = Visibility.Visible;
-            locationWatcher.Start();
+            locationWatcher.Start();*/
 
+            myMap.ZoomBarVisibility = Visibility.Visible;
+            myMap.Center = new GeoCoordinate(35.76733, -78.69568);
+            myMap.ZoomLevel = 17.0;
 
             DataContext = App.ViewModel;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
@@ -48,7 +50,7 @@ namespace TestApp
             //pin.Location = new GeoCoordinate(35.76733,-78.69568);
             pin.Template = (ControlTemplate)App.Current.Resources["MyLocationPin"];
             myMap.Children.Add(pin);
-            myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 16.0);
+            myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 17.0);
             //myMap.SetView(new GeoCoordinate(35.76733, -78.69568), 16.0);
         }
 
@@ -234,8 +236,8 @@ namespace TestApp
             MapPolyline myPoly = new MapPolyline();
 
             myPoly.Stroke = stringtoBrush(routeColor);
-            myPoly.StrokeThickness = 2;
-            myPoly.Opacity = 0.8;
+            myPoly.StrokeThickness = 5;
+            myPoly.Opacity = 1;
 
             myPoly.Locations = coordinates;
             myMap.Children.Add(myPoly);
@@ -286,7 +288,10 @@ namespace TestApp
 
                     foreach (Stop currStop in App.ViewModel.stopCache.Values)
                     {
-                        addStopToMap(currStop);
+                        if (currStop.routes.Intersect(App.ViewModel.selectedRoutes).ToList().Count > 0)
+                        {
+                            addStopToMap(currStop);
+                        }
                     }
                 }
             }

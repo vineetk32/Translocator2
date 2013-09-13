@@ -9,11 +9,14 @@
     <!--Application Resources-->
     <Application.Resources>
         <ControlTemplate  x:Key="StopPin" TargetType="my:Pushpin" >
-               <Ellipse Fill="Green" Width="15" Height="15" />
+               <Ellipse Fill="Green" Width="10" Height="10" />
         </ControlTemplate>
 
         <ControlTemplate  x:Key="VehiclePin" TargetType="my:Pushpin">
-            <Ellipse Fill="{Binding Color}" Width="10" Height="10" Stroke="White" />
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding RouteShortName}" FontSize="10" FontStyle="Normal"/>
+                <Ellipse Fill="{Binding Color}" Width="15" Height="15" Stroke="Black" StrokeThickness="1"/>
+            </StackPanel>
         </ControlTemplate>
         
         <ControlTemplate  x:Key="MyLocationPin" TargetType="my:Pushpin" >

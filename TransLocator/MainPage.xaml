@@ -29,7 +29,8 @@
                         <map:MapItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <map:Pushpin Location="{Binding VehicleLocation}" 
-                                          Template="{StaticResource VehiclePin}">
+                                          Template="{StaticResource VehiclePin}"
+                                             Content="{Binding RouteShortName}">
                                 </map:Pushpin>
                             </DataTemplate>
                         </map:MapItemsControl.ItemTemplate>
