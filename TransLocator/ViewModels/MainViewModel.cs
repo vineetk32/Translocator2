@@ -1,17 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
-using System.Windows.Shapes;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Controls.Maps;
 using System.Device.Location;
-
 
 public class Location
 {
@@ -183,7 +178,7 @@ public class VehicleRoot
 }
 
 
-namespace TestApp
+namespace Translocator
 {
     public class MainViewModel : INotifyPropertyChanged
     {
@@ -343,6 +338,7 @@ namespace TestApp
                     Agencies = currStop.agency_ids,
                     Routes = currStop.routes,
                     StopCode = currStop.code,
+                    StopLocation = new GeoCoordinate(currStop.location.lat,currStop.location.lng)
                 };
                 if (arrivalCache.ContainsKey(stopID))
                 {

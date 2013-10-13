@@ -12,9 +12,43 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using System.Windows.Data;
 
-namespace TestApp
+using System.IO;
+using System.IO.IsolatedStorage;
+
+namespace Translocator
 {
+    public class PushpinScaleTransform : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            double currentZoomLevel = (double)value;
+
+            // Calculate the scale to use. This is just a simple algorithm that
+            // I found works nicely.
+            var scaleVal = (0.05 * (currentZoomLevel + 1)) + 0.3;
+
+            var transform = new ScaleTransform();
+            transform.ScaleX = scaleVal;
+            transform.ScaleY = scaleVal;
+
+            // Set the transform center X and Y so the Pushpin stays at the correct location.
+            // The Default Pushpin's height is 35 and width is 34
+            // Since the Default Pushpin's PositionOrigin is set to BottomCenter, we need to
+            // set the CenterX to half the width (17), and CenterY to the height (35).
+            transform.CenterX = 17;
+            transform.CenterY = 35;
+
+            return transform;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public partial class App : Application
     {
         private static MainViewModel viewModel = null;
@@ -92,6 +126,10 @@ namespace TestApp
         // This code will not execute when the application is first launched
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
+            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
+            settings.Add("SelectedAgencies", App.ViewModel.selectedAgencies);
+            settings.Add("SelectedRoutes", App.ViewModel.selectedRoutes);
+            settings.Save();
         }
 
         // Code to execute when the application is deactivated (sent to background)
@@ -104,8 +142,7 @@ namespace TestApp
         // This code will not execute when the application is deactivated
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
-            // Ensure that required application state is persisted here.
-        }
+                    }
 
         // Code to execute if a navigation fails
         private void RootFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
@@ -163,4 +200,5 @@ namespace TestApp
 
         #endregion
     }
+
 }

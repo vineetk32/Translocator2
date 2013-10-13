@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace TestApp
+namespace Translocator
 {
     public class AgencyViewModel : INotifyPropertyChanged
     {
@@ -72,8 +72,6 @@ namespace TestApp
                     {
                         App.ViewModel.selectedAgencies.Remove(this._agencyID);
                         App.ViewModel.removeRoutes(this.AgencyID);
-                        //TODO
-                        //App.ViewModel.cleanUpStops();
                     }
                     NotifyPropertyChanged("IsSelected");
                 }

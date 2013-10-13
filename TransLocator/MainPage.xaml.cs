@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Controls.Maps;
 using System.Device.Location;
 
-namespace TestApp
+namespace Translocator
 {
     public partial class MainPage : PhoneApplicationPage
     {
@@ -243,16 +236,16 @@ namespace TestApp
             myMap.Children.Add(myPoly);
         }
 
-        private void addStopToMap(Stop currStop)
-        {
-            MapLayer stopCirle = new MapLayer();
+        //private void addStopToMap(Stop currStop)
+        //{
+        //    MapLayer stopCirle = new MapLayer();
 
-            Pushpin pin = new Pushpin() { Location = new GeoCoordinate(currStop.location.lat, currStop.location.lng) };
-            pin.Width = 50;
-            pin.Height = 50;
-            pin.Template = (ControlTemplate)App.Current.Resources["StopPin"];
-            myMap.Children.Add(pin);
-        }
+        //    Pushpin pin = new Pushpin() { Location = new GeoCoordinate(currStop.location.lat, currStop.location.lng) };
+        //    pin.Width = 50;
+        //    pin.Height = 50;
+        //    pin.Template = (ControlTemplate)App.Current.Resources["StopPin"];
+        //    myMap.Children.Add(pin);
+        //}
 
         private SolidColorBrush stringtoBrush(string colour)
         {
@@ -286,16 +279,17 @@ namespace TestApp
                     }
                     isMapUptoDate = true;
 
-                    foreach (Stop currStop in App.ViewModel.stopCache.Values)
-                    {
-                        if (currStop.routes.Intersect(App.ViewModel.selectedRoutes).ToList().Count > 0)
-                        {
-                            addStopToMap(currStop);
-                        }
-                    }
+                    //foreach (Stop currStop in App.ViewModel.stopCache.Values)
+                    //{
+                    //    if (currStop.routes.Intersect(App.ViewModel.selectedRoutes).ToList().Count > 0)
+                    //    {
+                    //        addStopToMap(currStop);
+                    //    }
+                    //}
                 }
             }
 
         }
    }
+
 }

@@ -11,8 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Collections.Generic;
+using System.Device.Location;
 
-namespace TestApp
+namespace Translocator
 {
     public class ArrivalInfo
     {
@@ -67,12 +68,15 @@ namespace TestApp
         private List<int> _agencies;
         private List<long> _routes;
         private Dictionary<long,ArrivalInfo> _arrival_estimates;
+        private Location location;
 
         public StopViewModel()
         {
             _agencies = new List<int>();
             _routes = new List<long>();
             _arrival_estimates = new Dictionary<long, ArrivalInfo>();
+            location = new Location();
+
         }
 
         public List<int> Agencies
@@ -89,6 +93,19 @@ namespace TestApp
                 }
             }
         }
+
+        public GeoCoordinate StopLocation
+        {
+            get
+            {
+                return new GeoCoordinate(location.lat, location.lng);
+            }
+            set
+            {
+                NotifyPropertyChanged("StopLocation");
+            }
+        }
+
 
         public List<long> Routes
         {
