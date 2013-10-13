@@ -1,17 +1,10 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Device.Location;
+using System.Net;
+using Translocator;
 
 namespace Translocator
 {
@@ -61,35 +54,43 @@ namespace Translocator
 
     }
 
-    public class StopViewModel : INotifyPropertyChanged
+    public class StopRoot
     {
-        private string _stopName, _stopCode;
-        private long _stopID;
-        private List<int> _agencies;
-        private List<long> _routes;
-        private Dictionary<long,ArrivalInfo> _arrival_estimates;
-        private Location location;
+        public StopRoot() { data = new List<Stop>(); }
+        public List<Stop> data { get; set; }
+    }
 
-        public StopViewModel()
+    public class Stop : INotifyPropertyChanged
+    {
+
+        public string code;
+        public List<long> agency_ids;
+        //public string location_type;
+        public Location location;
+        public long stop_id;
+        public List<long> routes;
+        public string name;
+        private Dictionary<long, ArrivalInfo> _arrival_estimates;
+
+        public Stop()
         {
-            _agencies = new List<int>();
-            _routes = new List<long>();
+            agency_ids = new List<long>();
+            routes = new List<long>();
             _arrival_estimates = new Dictionary<long, ArrivalInfo>();
             location = new Location();
-
         }
 
-        public List<int> Agencies
+        public List<long> AgencyIDs
         {
             get
             {
-                return _agencies;
+                return agency_ids;
             }
             set
             {
-                if (value != _agencies)
+                if (value != agency_ids)
                 {
-                    _agencies = value;
+                    agency_ids = value;
                 }
             }
         }
@@ -107,17 +108,17 @@ namespace Translocator
         }
 
 
-        public List<long> Routes
+        public List<long> RouteIDs
         {
             get
             {
-                return _routes;
+                return routes;
             }
             set
             {
-                if (value != _routes)
+                if (value != routes)
                 {
-                    _routes = value;
+                    routes = value;
                 }
             }
         }
@@ -126,13 +127,13 @@ namespace Translocator
         {
             get
             {
-                return _stopName;
+                return name;
             }
             set
             {
-                if (value != _stopName)
+                if (value != name)
                 {
-                    _stopName = value;
+                    name = value;
                     NotifyPropertyChanged("StopName");
                 }
             }
@@ -142,13 +143,13 @@ namespace Translocator
         {
             get
             {
-                return _stopID;
+                return stop_id;
             }
             set
             {
-                if (value != _stopID)
+                if (value != stop_id)
                 {
-                    _stopID = value;
+                    stop_id = value;
                 }
             }
         }
@@ -157,13 +158,13 @@ namespace Translocator
         {
             get
             {
-                return _stopCode;
+                return code;
             }
             set
             {
-                if (value != _stopCode)
+                if (value != code)
                 {
-                    _stopCode = value;
+                    code = value;
                 }
             }
         }
@@ -192,6 +193,24 @@ namespace Translocator
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+    }
+
+    public class StopDatahandler
+    {
+        public void addStops(long agencyID)
+        {
+            String uri = Util.TRANSLOC_URL_BASE_12 + "/stops.json?agencies=" + agencyID;
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadStopsCallback), request);
+        }
+
+        private void ReadStopsCallback(IAsyncResult asynchronousResult)
+        {
+            string resultString = Util.ProcessCallBack(asynchronousResult);
+            var stopsroot = JsonConvert.DeserializeObject<StopRoot>(resultString);
+
+            App.ViewModel.addStops(stopsroot.data);
         }
     }
 }

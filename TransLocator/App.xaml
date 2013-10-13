@@ -10,7 +10,7 @@
     <!--Application Resources-->
     <Application.Resources>
         <ControlTemplate  x:Key="StopPin" TargetType="my:Pushpin" >
-               <Ellipse Fill="Green" Width="30" Height="30" />
+               <Ellipse Fill="Green" Width="15" Height="15" />
         </ControlTemplate>
 
         <ControlTemplate  x:Key="VehiclePin" TargetType="my:Pushpin">

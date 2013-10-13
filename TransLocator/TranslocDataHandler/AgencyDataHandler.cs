@@ -1,35 +1,39 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
+using Translocator;
 
 namespace Translocator
 {
-    public class AgencyViewModel : INotifyPropertyChanged
+
+    public class AgencyRoot
     {
-        private string _agencyName,_agencyShortName;
+        public AgencyRoot() { data = new List<Agency>(); }
+        public List<Agency> data { get; set; }
+    }
+
+    public class Agency : INotifyPropertyChanged
+    {
+        public string long_name { get; set; }
+        public string short_name { get; set; }
+        //public string url { get; set; }
+        public int agency_id { get; set; }
+
         private bool _isSelected;
-        private int _agencyID;
 
         public string AgencyName
         {
             get
             {
-                return _agencyName;
+                return long_name;
             }
             set
             {
-                if (value != _agencyName)
+                if (value != long_name)
                 {
-                    _agencyName = value;
+                    long_name = value;
                     NotifyPropertyChanged("AgencyName");
                 }
             }
@@ -39,18 +43,17 @@ namespace Translocator
         {
             get
             {
-                return _agencyShortName;
+                return short_name;
             }
             set
             {
-                if (value != _agencyShortName)
+                if (value != short_name)
                 {
-                    _agencyShortName = value;
+                    short_name = value;
                     NotifyPropertyChanged("AgencyShortName");
                 }
             }
         }
-
         public bool IsSelected
         {
             get
@@ -64,14 +67,11 @@ namespace Translocator
                     _isSelected = value;
                     if (value == true)
                     {
-                        App.ViewModel.selectedAgencies.Add(this._agencyID);
-                        App.ViewModel.addRoutes(this.AgencyID);
-                        App.ViewModel.addStops(this.AgencyID);
+                        App.ViewModel.addAgencyData(agency_id);
                     }
                     else if (value == false)
                     {
-                        App.ViewModel.selectedAgencies.Remove(this._agencyID);
-                        App.ViewModel.removeRoutes(this.AgencyID);
+                        App.ViewModel.removeAgencyData(agency_id);
                     }
                     NotifyPropertyChanged("IsSelected");
                 }
@@ -82,14 +82,13 @@ namespace Translocator
         {
             get
             {
-                return _agencyID;
+                return agency_id;
             }
             set
             {
-                if (value != _agencyID)
+                if (value != agency_id)
                 {
-                    _agencyID = value;
-                    NotifyPropertyChanged("AgencyID");
+                    agency_id = value;
                 }
             }
         }
@@ -104,4 +103,25 @@ namespace Translocator
             }
         }
     }
+
+
+    public class AgencyDataHandler
+    {
+        private void ReadAgencyCallback(IAsyncResult asynchronousResult)
+        {
+            string resultString = Util.ProcessCallBack(asynchronousResult);
+            var agencyroot = JsonConvert.DeserializeObject<AgencyRoot>(resultString);
+
+            //List<AgencyViewModel> retrievedAgencies;
+            App.ViewModel.addAgencies(agencyroot.data);
+        }
+
+        public void addAgencies()
+        {
+            String uri = Util.TRANSLOC_URL_BASE_12 + "agencies.json";
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.BeginGetResponse(new AsyncCallback(ReadAgencyCallback), request);
+        }
+    }
 }
+
