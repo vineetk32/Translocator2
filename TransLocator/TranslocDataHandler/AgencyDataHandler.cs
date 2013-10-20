@@ -19,7 +19,7 @@ namespace Translocator
         public string long_name { get; set; }
         public string short_name { get; set; }
         //public string url { get; set; }
-        public int agency_id { get; set; }
+        public long agency_id { get; set; }
 
         private bool _isSelected;
 
@@ -65,6 +65,7 @@ namespace Translocator
                 if (value != _isSelected)
                 {
                     _isSelected = value;
+                    NotifyPropertyChanged("IsSelected");
                     if (value == true)
                     {
                         App.ViewModel.addAgencyData(agency_id);
@@ -73,12 +74,17 @@ namespace Translocator
                     {
                         App.ViewModel.removeAgencyData(agency_id);
                     }
-                    NotifyPropertyChanged("IsSelected");
                 }
             }
         }
 
-        public int AgencyID
+        public void selectAgency()
+        {
+                _isSelected = true;
+                NotifyPropertyChanged("IsSelected");
+        }
+
+        public long AgencyID
         {
             get
             {
@@ -112,8 +118,18 @@ namespace Translocator
             string resultString = Util.ProcessCallBack(asynchronousResult);
             var agencyroot = JsonConvert.DeserializeObject<AgencyRoot>(resultString);
 
-            //List<AgencyViewModel> retrievedAgencies;
+            //List<Agency> retrievedAgencies;
+
+            foreach (Agency agency in agencyroot.data)
+            {
+                if (App.ViewModel.restoredAgencies.Contains(agency.agency_id))
+                {
+                    agency.IsSelected = true;
+                }
+            }
+            App.ViewModel.restoredAgencies.Clear();
             App.ViewModel.addAgencies(agencyroot.data);
+
         }
 
         public void addAgencies()

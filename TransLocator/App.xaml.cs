@@ -25,8 +25,6 @@ namespace Translocator
         {
             double currentZoomLevel = (double)value;
 
-            // Calculate the scale to use. This is just a simple algorithm that
-            // I found works nicely.
             var scaleVal = (0.05 * (currentZoomLevel + 1)) + 0.3;
 
             var transform = new ScaleTransform();
@@ -114,22 +112,31 @@ namespace Translocator
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-            // Ensure that application state is restored appropriately
+            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
+            if (settings.Contains("SelectedAgencies"))
+            {
+                App.ViewModel.restoredAgencies = (List<long>)settings["SelectedAgencies"];
+            }
+            else
+            {
+                (Application.Current.RootVisual as PhoneApplicationFrame).Navigate(new Uri("/AgencyPage.xaml", UriKind.Relative));
+            }
+            if (settings.Contains("SelectedRoutes"))
+            {
+                App.ViewModel.restoredRoutes = (List<long>)settings["SelectedRoutes"];
+            }
+
             if (!App.ViewModel.IsDataLoaded)
             {
                 App.ViewModel.LoadData();
             }
-
         }
 
         // Code to execute when the application is activated (brought to foreground)
         // This code will not execute when the application is first launched
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
-            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
-            settings.Add("SelectedAgencies", App.ViewModel.selectedAgencies);
-            settings.Add("SelectedRoutes", App.ViewModel.selectedRoutes);
-            settings.Save();
+
         }
 
         // Code to execute when the application is deactivated (sent to background)
@@ -142,7 +149,11 @@ namespace Translocator
         // This code will not execute when the application is deactivated
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
-                    }
+            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
+            settings.Add("SelectedAgencies", App.ViewModel.selectedAgencies);
+            settings.Add("SelectedRoutes", App.ViewModel.selectedRoutes);
+            settings.Save();
+        }
 
         // Code to execute if a navigation fails
         private void RootFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)

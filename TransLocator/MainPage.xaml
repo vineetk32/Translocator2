@@ -8,8 +8,7 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:map="clr-namespace:Microsoft.Phone.Controls.Maps;assembly=Microsoft.Phone.Controls.Maps"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
+        mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -22,60 +21,6 @@
         <!--Pivot Control-->
         <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" LoadedPivotItem="ParentPivot_LoadedPivotItem">
 
-            <controls:PivotItem Header="map" x:Name="MapsPivot" >
-                <map:Map CredentialsProvider="AlT5CXNXGeEgbxfQLDeWbjRC7lFiF-EXWvmNxYpQBeQMkXYMos_SD_PVo8VPu6E_" Name="myMap" Mode="Road">
-                    <map:MapItemsControl ItemsSource="{Binding currVehicles}">
-                        <map:MapItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <map:Pushpin Location="{Binding VehicleLocation}" 
-                                          Template="{StaticResource VehiclePin}"
-                                             Content="{Binding RouteShortName}"
-                                             RenderTransform="{Binding ZoomLevel, ElementName=myMap,
-                                    Converter={StaticResource PushpinScaleTransform}}">
-                                </map:Pushpin>
-                            </DataTemplate>
-                        </map:MapItemsControl.ItemTemplate>
-                    </map:MapItemsControl>
-
-                    <map:MapItemsControl ItemsSource="{Binding stops}">
-                        <map:MapItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <map:Pushpin Location="{Binding StopLocation}" 
-                                          Template="{StaticResource StopPin}"
-                                             RenderTransform="{Binding ZoomLevel, ElementName=myMap, 
-                                    Converter={StaticResource PushpinScaleTransform}}">
-                                </map:Pushpin>
-                            </DataTemplate>
-                        </map:MapItemsControl.ItemTemplate>
-                    </map:MapItemsControl>
-
-                </map:Map>
-            </controls:PivotItem>
-
-            <controls:PivotItem Header="agencies" x:Name="AgenciesPivot">
-                <ListBox x:Name="FirstListBox" Margin="0,0,-12,0" ItemsSource="{Binding Path=agencies, Mode=TwoWay}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <CheckBox x:Name="chkAgency" Grid.Column="0" Grid.Row="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" Checked="chkAgency_Checked" Unchecked="chkAgency_Unchecked"/>
-                                <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding AgencyShortName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding AgencyName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </controls:PivotItem>
- 
-            <!--Pivot item two-->
             <controls:PivotItem Header="routes" x:Name="RoutesPivot">
                 <ListBox x:Name="RoutesListBox" Margin="0,0,-12,0" ItemsSource="{Binding routes}">
                     <ListBox.ItemTemplate>
@@ -143,10 +88,11 @@
 
         </controls:Pivot>
         </Grid>
-    <!-- <phone:PhoneApplicationPage.ApplicationBar>
+    <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar.feature.settings.rest.png" Text="Show/Hide"/>
+            <shell:ApplicationBarIconButton x:Name="MapsButton" IconUri="/Images/map.png" Text="Map" IsEnabled="False" Click="MapsButton_Click"/>
+            <shell:ApplicationBarIconButton x:Name="AgenciesButton" IconUri="/Images/appbar.feature.settings.rest.png" Text="Agencies" IsEnabled="True" Click="AgenciesButton_Click"/>
         </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
+    </phone:PhoneApplicationPage.ApplicationBar>
 
 </phone:PhoneApplicationPage>

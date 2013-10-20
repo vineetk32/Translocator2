@@ -95,6 +95,13 @@ namespace Translocator
             }
         }
 
+        public void selectRoute()
+        {
+            _isSelected = true;
+            NotifyPropertyChanged("IsSelected");
+        }
+
+
 
         public bool IsSelected
         {
