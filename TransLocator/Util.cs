@@ -4,6 +4,7 @@ using System.Net;
 using System.Windows;
 using Microsoft.Phone.Controls.Maps;
 using System.Windows.Media;
+using System.Device.Location;
 
 namespace Translocator
 {

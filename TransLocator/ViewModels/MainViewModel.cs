@@ -29,6 +29,9 @@ namespace Translocator
             this.selectedRoutes = new List<long>();
             this.selectedAgencies = new List<long>();
 
+            this.restoredAgencies = new List<long>();
+            this.restoredRoutes = new List<long>();
+
             dt = new System.Windows.Threading.DispatcherTimer();
             dt.Interval = new TimeSpan(0, 0, 0, 5);
             dt.Tick += new EventHandler(dt_Tick);
@@ -50,6 +53,9 @@ namespace Translocator
 
         public List<long> selectedRoutes;
         public List<long> selectedAgencies;
+
+        public List<long> restoredRoutes;
+        public List<long> restoredAgencies;
 
         private TranslocDataHandler dataHandler;
 
@@ -114,9 +120,29 @@ namespace Translocator
                     }
                 }
             });
+
+            if (restoredRoutes.Count > 0)
+            {
+                restoreRoutes();
+            }
         }
 
-        public void addRouteData(long agencyID, long routeID)
+        public void restoreRoutes()
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            {
+                foreach (Route route in routes)
+                {
+                    if (restoredRoutes.Contains(route.route_id))
+                    {
+                        route.IsSelected = true;
+                    }
+                }
+            });
+            restoredRoutes.Clear();
+        }
+
+        public void addRouteData(long agencyID, long routeID,bool isFromRestore=false)
         {
             selectedRoutes.Add(routeID);
 
@@ -125,6 +151,18 @@ namespace Translocator
             {
                 this.selectedRoutesNames.Add(routeName);
             });
+
+            foreach (Route route in routes)
+            {
+                if (route.route_id == routeID)
+                {
+                    Deployment.Current.Dispatcher.BeginInvoke(delegate
+                    {
+                        route.selectRoute();
+                    });
+                }
+            }
+
 
             //App.ViewModel.cacheArrivals(this.RouteID);
             dataHandler.addSegments(agencyID, routeID);
