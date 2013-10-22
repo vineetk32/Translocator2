@@ -6,6 +6,8 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Controls.Maps;
 using System.Device.Location;
 using Microsoft.Phone.Shell;
+using System.IO.IsolatedStorage;
+using System.Collections.Generic;
 
 namespace Translocator
 {
@@ -38,16 +40,32 @@ namespace Translocator
             isMapUptoDate = false;
 
             DataContext = App.ViewModel;
+
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
         }
         
         // Load data for the ViewModel Items
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
+            if (settings.Contains("SelectedAgencies"))
+            {
+                App.ViewModel.restoredAgencies = (List<long>)settings["SelectedAgencies"];
+            }
+            else
+            {
+                NavigationService.Navigate(new Uri("/AgencyPage.xaml", UriKind.Relative));
+            }
+            if (settings.Contains("SelectedRoutes"))
+            {
+                App.ViewModel.restoredRoutes = (List<long>)settings["SelectedRoutes"];
+            }
+
             if (!App.ViewModel.IsDataLoaded)
             {
                 App.ViewModel.LoadData();
             }
+            this.Loaded -= new RoutedEventHandler(MainPage_Loaded);
         }
 
         private void RouteList_SelectionChanged(object sender, SelectionChangedEventArgs e)

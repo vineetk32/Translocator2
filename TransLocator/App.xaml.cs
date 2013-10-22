@@ -112,20 +112,6 @@ namespace Translocator
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
-            if (settings.Contains("SelectedAgencies"))
-            {
-                App.ViewModel.restoredAgencies = (List<long>)settings["SelectedAgencies"];
-            }
-            else
-            {
-                (Application.Current.RootVisual as PhoneApplicationFrame).Navigate(new Uri("/AgencyPage.xaml", UriKind.Relative));
-            }
-            if (settings.Contains("SelectedRoutes"))
-            {
-                App.ViewModel.restoredRoutes = (List<long>)settings["SelectedRoutes"];
-            }
-
             if (!App.ViewModel.IsDataLoaded)
             {
                 App.ViewModel.LoadData();
@@ -150,8 +136,22 @@ namespace Translocator
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
             IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
-            settings.Add("SelectedAgencies", App.ViewModel.selectedAgencies);
-            settings.Add("SelectedRoutes", App.ViewModel.selectedRoutes);
+            if (settings.Contains("SelectedAgencies"))
+            {
+                settings["SelectedAgencies"] = App.ViewModel.selectedAgencies;
+            }
+            else
+            {
+                settings.Add("SelectedAgencies", App.ViewModel.selectedAgencies);
+            }
+            if (settings.Contains("SelectedRoutes"))
+            {
+                settings["SelectedRoutes"] = App.ViewModel.selectedRoutes;
+            }
+            else
+            {
+                settings.Add("SelectedRoutes", App.ViewModel.selectedRoutes);
+            }
             settings.Save();
         }
 

@@ -4,18 +4,22 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:my="clr-namespace:Microsoft.Phone.Controls.Maps;assembly=Microsoft.Phone.Controls.Maps"
     xmlns:local="clr-namespace:Translocator"
-    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone" xmlns:edc="clr-namespace:Microsoft.Expression.Controls;assembly=Microsoft.Expression.Drawing" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" 
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:edc="clr-namespace:Microsoft.Expression.Controls;assembly=Microsoft.Expression.Drawing"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" 
     x:Class="Translocator.App"
     >
 
     <!--Application Resources-->
     <Application.Resources>
     	<ControlTemplate  x:Key="StopPin" TargetType="my:Pushpin" >
-    		<Ellipse Fill="Green" Width="15" Height="15" />
+    		<Ellipse Fill="Black" Width="15" Height="15" Stroke="White"/>
     	</ControlTemplate>
 
     	<ControlTemplate  x:Key="VehiclePin" TargetType="my:Pushpin">
-    		<edc:Callout AnchorPoint="0.187,1.211" CalloutStyle="Oval" Fill="#FFF4F4F5" FontSize="14.666999816894531" Height="34" Stroke="Black" StrokeThickness="1" Width="34" RenderTransformOrigin="0.471,0.5" Content="">
+    		<edc:Callout AnchorPoint="0.187,1.211" CalloutStyle="Oval" Fill="{Binding Color}" FontSize="14" Height="34" Stroke="Black" StrokeThickness="1" Width="34" Content="{Binding RouteShortName}">
     		</edc:Callout>
     	</ControlTemplate>
         
