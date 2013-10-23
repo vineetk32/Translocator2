@@ -19,7 +19,7 @@
     	</ControlTemplate>
 
     	<ControlTemplate  x:Key="VehiclePin" TargetType="my:Pushpin">
-    		<edc:Callout AnchorPoint="0.187,1.211" CalloutStyle="Oval" Fill="{Binding Color}" FontSize="14" Height="34" Stroke="Black" StrokeThickness="1" Width="34" Content="{Binding RouteShortName}">
+    		<edc:Callout AnchorPoint="0.187,1.211" CalloutStyle="Oval" Fill="{Binding Color}" FontSize="14" Height="34" Stroke="Black" StrokeThickness="1" Width="34" Content="{Binding RouteShortName}" FontWeight="SemiBold">
     		</edc:Callout>
     	</ControlTemplate>
         
