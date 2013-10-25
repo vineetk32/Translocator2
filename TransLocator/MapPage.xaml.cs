@@ -65,5 +65,15 @@ namespace Translocator
                 }
             }
         }
+
+        private void Pushpin_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            var currStopPin = sender as Pushpin;
+            ContextMenu contextMenu = ContextMenuService.GetContextMenu(currStopPin);
+            if (contextMenu.Parent == null)
+            {
+                contextMenu.IsOpen = true;
+            }
+        }
     }
 }

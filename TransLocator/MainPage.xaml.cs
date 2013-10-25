@@ -172,6 +172,13 @@ namespace Translocator
             {
                 App.ViewModel.cacheAllArrivals();
             }
+            else if (ParentPivot.SelectedItem == RoutesPivot)
+            {
+                if (App.ViewModel.selectedRoutes.Count == 0 || App.ViewModel.selectedAgencies.Count == 0)
+                {
+                    HideStops();
+                }
+            }
         }
 
         private void MapsButton_Click(object sender, EventArgs e)

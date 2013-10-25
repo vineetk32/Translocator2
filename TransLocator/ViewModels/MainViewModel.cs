@@ -156,10 +156,7 @@ namespace Translocator
             {
                 if (route.route_id == routeID)
                 {
-                    Deployment.Current.Dispatcher.BeginInvoke(delegate
-                    {
-                        route.selectRoute();
-                    });
+                    route.selectRoute();
                 }
             }
 
@@ -199,7 +196,7 @@ namespace Translocator
         }
 
 
-
+        //TODO: Remove from StopCache and stops once the route is removed.
         public void addStops(List<Stop> retrievedStops)
         {
             foreach (Stop stop in retrievedStops)
@@ -209,6 +206,29 @@ namespace Translocator
                     stopCache.Add(stop.stop_id, stop);
                 }
             }
+            
+        }
+
+        public void updateStops()
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            {
+                this.stops.Clear();
+            });
+
+            foreach (long stopID in stopCache.Keys)
+            {
+                Stop currStop = stopCache[stopID];
+                if (arrivalCache.ContainsKey(stopID))
+                {
+                    currStop.ArrivalEstimates = arrivalCache[stopID];
+                    Deployment.Current.Dispatcher.BeginInvoke(delegate
+                    {
+                        this.stops.Add(currStop);
+                    });
+                }
+            }
+
         }
 
         public void addVehicles(List<Vehicle> retrievedVehicles)
@@ -263,7 +283,7 @@ namespace Translocator
             int routeIndex = selectedRoutesNames.IndexOf(routeName);
             selectedRoute = routeCache[selectedRoutes[routeIndex]];
 
-            Deployment.Current.Dispatcher.BeginInvoke(delegate
+            /*Deployment.Current.Dispatcher.BeginInvoke(delegate
             {
                 this.stops.Clear();
             });
@@ -279,6 +299,19 @@ namespace Translocator
                     {
                         this.stops.Add(currStop);
                     });
+                }
+
+            }*/
+
+            foreach (Stop stop in stops)
+            {
+                if (!selectedRoute.stops.Contains(stop.stop_id))
+                {
+                    stop.IsVisible = false;
+                }
+                else
+                {
+                    stop.IsVisible = true;
                 }
 
             }

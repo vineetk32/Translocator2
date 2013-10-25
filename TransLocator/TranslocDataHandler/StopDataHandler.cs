@@ -71,6 +71,7 @@ namespace Translocator
         public List<long> routes;
         public string name;
         private Dictionary<long, ArrivalInfo> _arrival_estimates;
+        private bool _isVisible;
 
         public Stop()
         {
@@ -78,6 +79,23 @@ namespace Translocator
             routes = new List<long>();
             _arrival_estimates = new Dictionary<long, ArrivalInfo>();
             location = new Location();
+            _isVisible = true;
+        }
+
+        public bool IsVisible
+        {
+            get
+            {
+                return _isVisible;
+            }
+            set
+            {
+                if (value != _isVisible)
+                {
+                    _isVisible = value;
+                    NotifyPropertyChanged("IsVisible");
+                }
+            }
         }
 
         public List<long> AgencyIDs

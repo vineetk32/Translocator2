@@ -8,7 +8,7 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
+        mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696" 
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -57,7 +57,7 @@
                     <ListBox Grid.Row="1" x:Name="StopsListBox" Margin="0,0,-12,0" ItemsSource="{Binding stops}" CacheMode="BitmapCache">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:Name="CurrStop">
-                                <StackPanel>
+                                <StackPanel Visibility="{Binding IsVisible, Converter={StaticResource boolToVisibility}}">
                                     <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
                             <TextBlock Text="{Binding StopCode, StringFormat='Stop code: {0}'}" TextWrapping="Wrap" Style="{StaticResource PhoneTextSmallStyle}"/>
                                 <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
@@ -66,8 +66,8 @@
                                                 <StackPanel>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
                                                             <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
                                                         </Grid.ColumnDefinitions>
 
                                                         <TextBlock Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" Text="{Binding Value.RouteName, Mode=OneWay}" Foreground="{Binding Value.RouteColor}" Style="{StaticResource PhoneTextSmallStyle}"/>

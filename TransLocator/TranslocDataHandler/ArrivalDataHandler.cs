@@ -89,13 +89,14 @@ namespace Translocator
                     contents.Append(" " + RouteName.ToString() + ":" + arrivalCache[StopID][RouteName]);
                 }
             }
-            cleanUpStops(); */
+            cleanUpStops(); 
             //TODO - remove this bullshit way of doing this, and use await() instead.
             if (App.ViewModel.selectedRoutesNames.Count > 0 && App.ViewModel.stops.Count == 0)
             {
                 string route = App.ViewModel.selectedRoutesNames[0];
                 App.ViewModel.addArrivalsForRoute(route);
-            }
+            }*/
+            App.ViewModel.updateStops();
         }
 
         public void cacheArrivals(long agencyID,long routeID)

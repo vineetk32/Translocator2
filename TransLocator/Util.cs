@@ -5,6 +5,8 @@ using System.Windows;
 using Microsoft.Phone.Controls.Maps;
 using System.Windows.Media;
 using System.Device.Location;
+using System.Windows.Data;
+using System.Globalization;
 
 namespace Translocator
 {
@@ -12,6 +14,27 @@ namespace Translocator
     {
         public double lat;
         public double lng;
+    }
+
+    //Taken from Nokia developer
+    public class BooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+                return Visibility.Collapsed;
+
+            var isVisible = (bool)value;
+
+            return isVisible ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var visiblity = (Visibility)value;
+
+            return visiblity == Visibility.Visible;
+        }
     }
 
     class Util

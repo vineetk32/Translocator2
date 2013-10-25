@@ -6,16 +6,62 @@
     xmlns:local="clr-namespace:Translocator"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:edc="clr-namespace:Microsoft.Expression.Controls;assembly=Microsoft.Expression.Drawing"
+    xmlns:sltkit= "clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" 
+        mc:Ignorable="d" 
     x:Class="Translocator.App"
     >
 
     <!--Application Resources-->
     <Application.Resources>
-    	<ControlTemplate  x:Key="StopPin" TargetType="my:Pushpin" >
-    		<Ellipse Fill="Black" Width="15" Height="15" Stroke="White"/>
+
+        <local:BooleanToVisibilityConverter x:Key="boolToVisibility"/>
+
+        <Style x:Key="MenuItemStyle" TargetType="sltkit:MenuItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="sltkit:MenuItem">
+                        <StackPanel>
+                            <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextNormalStyle}" Foreground="Black" />
+
+                            <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" Text="{Binding Value.RouteName, Mode=OneWay}"  Style="{StaticResource PhoneTextSmallStyle}" Foreground="{Binding Value.RouteColor}"/>
+                                                <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value.ArrivalTimes, Mode=OneWay}" Style="{StaticResource PhoneTextSmallStyle}" Foreground="{Binding Value.RouteColor}" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MenuStyle" TargetType="sltkit:ContextMenu">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border CornerRadius="8" Margin="24" 
+                               BorderBrush="Blue" BorderThickness="2" Background="White">
+                            <ItemsPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ControlTemplate  x:Key="StopPin" TargetType="my:Pushpin" >
+    		<Ellipse Fill="DarkGray" Width="15" Height="15" Stroke="White" Opacity="0.8"/>
     	</ControlTemplate>
 
     	<ControlTemplate  x:Key="VehiclePin" TargetType="my:Pushpin">
