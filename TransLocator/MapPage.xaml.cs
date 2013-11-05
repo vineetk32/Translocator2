@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define RELEASE
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,18 +12,22 @@ using Microsoft.Phone.Shell;
 using System.Device.Location;
 using Microsoft.Phone.Controls.Maps;
 
+
 namespace Translocator
 {
     public partial class MapPage : PhoneApplicationPage
     {
+        GeoCoordinateWatcher locationWatcher;
+
         public MapPage()
         {
             InitializeComponent();
 
-            /*locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+#if RELEASE
+            locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
             locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
-            locationWatcher.Start();*/
-
+            locationWatcher.Start();
+#endif
             DataContext = App.ViewModel;
 
 
@@ -34,8 +40,11 @@ namespace Translocator
         public void locationWatcher_getPosition(object sender, GeoPositionChangedEventArgs<GeoCoordinate> newLoc)
         {
             Pushpin pin = new Pushpin();
-            //pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
-            //pin.Location = new GeoCoordinate(35.76733,-78.69568);
+
+#if RELEASE
+            pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
+            pin.Location = new GeoCoordinate(35.76733,-78.69568);
+#endif
             pin.Template = (ControlTemplate)App.Current.Resources["MyLocationPin"];
             myMap.Children.Add(pin);
             myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 17.0);

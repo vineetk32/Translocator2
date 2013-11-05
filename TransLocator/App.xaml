@@ -23,9 +23,9 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="sltkit:MenuItem">
                         <StackPanel>
-                            <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextNormalStyle}" Foreground="Black" />
-
-                            <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                            <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextNormalStyle}" Foreground="Black"  />
+                            <Border BorderBrush="Black" BorderThickness="0,1,0,0">
+                                <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,5,0,5">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel>
@@ -41,6 +41,7 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
+                            </Border>
                         </StackPanel>
                     </ControlTemplate>
                 </Setter.Value>
@@ -51,8 +52,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Border CornerRadius="8" Margin="24" 
-                               BorderBrush="Blue" BorderThickness="2" Background="White">
+                        <Border Margin="24" 
+                               BorderBrush="Black" BorderThickness="2" Background="LightGoldenrodYellow">
                             <ItemsPresenter />
                         </Border>
                     </ControlTemplate>
