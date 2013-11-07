@@ -23,11 +23,7 @@ namespace Translocator
         {
             InitializeComponent();
 
-#if RELEASE
             locationWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
-            locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
-            locationWatcher.Start();
-#endif
             DataContext = App.ViewModel;
 
 
@@ -41,14 +37,16 @@ namespace Translocator
         {
             Pushpin pin = new Pushpin();
 
-#if RELEASE
             pin.Location = new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude);
-            pin.Location = new GeoCoordinate(35.76733,-78.69568);
-#endif
+            //pin.Location = new GeoCoordinate(35.76733,-78.69568);
+
             pin.Template = (ControlTemplate)App.Current.Resources["MyLocationPin"];
             myMap.Children.Add(pin);
             myMap.SetView(new GeoCoordinate(newLoc.Position.Location.Latitude, newLoc.Position.Location.Longitude), 17.0);
             //myMap.SetView(new GeoCoordinate(35.76733, -78.69568), 16.0);
+
+            locationWatcher.PositionChanged -= new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
+            locationWatcher.Stop();
         }
 
         private void addSegmentToMap(string segment, string routeColor)
@@ -83,6 +81,17 @@ namespace Translocator
             {
                 contextMenu.IsOpen = true;
             }
+        }
+
+        private void MyLocationButton_Click(object sender, EventArgs e)
+        {
+            locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
+            if (locationWatcher.Status == GeoPositionStatus.Disabled)
+            {
+                MessageBox.Show("Please enable location in settings!");
+                return;
+            }
+            locationWatcher.Start();
         }
     }
 }

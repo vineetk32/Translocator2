@@ -17,5 +17,10 @@ namespace Translocator
             InitializeComponent();
             DataContext = App.ViewModel;
         }
+
+        private void RoutesButton_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+        }
     }
 }

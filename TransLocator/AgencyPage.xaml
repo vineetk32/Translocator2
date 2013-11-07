@@ -50,5 +50,10 @@
                 </ListBox>
         </Grid>
     </Grid>
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+            <shell:ApplicationBarIconButton x:Name="RoutesButton" IconUri="/Images/appbar.feature.settings.rest.png" Text="Routes" IsEnabled="True" Click="RoutesButton_Click"/>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
 
 </phone:PhoneApplicationPage>
