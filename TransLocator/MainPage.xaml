@@ -89,7 +89,7 @@
         </controls:Pivot>
         </Grid>
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
             <shell:ApplicationBarIconButton x:Name="MapsButton" IconUri="/Images/map.png" Text="Map" IsEnabled="False" Click="MapsButton_Click"/>
             <shell:ApplicationBarIconButton x:Name="AgenciesButton" IconUri="/Images/appbar.feature.settings.rest.png" Text="Agencies" IsEnabled="True" Click="AgenciesButton_Click"/>
         </shell:ApplicationBar>

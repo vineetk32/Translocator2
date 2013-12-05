@@ -20,7 +20,10 @@ namespace Translocator
 
         private void RoutesButton_Click(object sender, EventArgs e)
         {
-            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+            if (this.NavigationService.CanGoBack)
+            {
+                this.NavigationService.GoBack();
+            }
         }
     }
 }

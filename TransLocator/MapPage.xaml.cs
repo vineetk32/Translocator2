@@ -27,7 +27,7 @@ namespace Translocator
             DataContext = App.ViewModel;
 
 
-            myMap.ZoomBarVisibility = Visibility.Visible;
+            //myMap.ZoomBarVisibility = Visibility.Visible;
             myMap.Center = new GeoCoordinate(35.76733, -78.69568);
             myMap.ZoomLevel = 17.0;
 
@@ -62,7 +62,7 @@ namespace Translocator
             myMap.Children.Add(myPoly);
         }
 
-        private void MapPage_GotFocus(object sender, RoutedEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             foreach (long routeID in App.ViewModel.selectedRoutes)
             {
