@@ -62,7 +62,7 @@
     </Grid>
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton x:Name="MyLocationButton" IconUri="/Images/location.png" Text="Me" IsEnabled="True" Click="MyLocationButton_Click"/>
+            <shell:ApplicationBarIconButton x:Name="MyLocationButton" IconUri="/Images/Crosshair.png" Text="Me" IsEnabled="True" Click="MyLocationButton_Click"/>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

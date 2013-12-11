@@ -8,6 +8,9 @@ using System.Device.Location;
 using Microsoft.Phone.Shell;
 using System.IO.IsolatedStorage;
 using System.Collections.Generic;
+using Microsoft.Phone.Tasks;
+using System.Text;
+using Microsoft.Phone.Info;
 
 namespace Translocator
 {
@@ -189,6 +192,34 @@ namespace Translocator
         private void AgenciesButton_Click(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/AgencyPage.xaml", UriKind.Relative));
+        }
+
+        private void ClickEvent(object sender, EventArgs e)
+        {
+            StringBuilder deviceInfo = new StringBuilder();
+
+
+            long ApplicationMemoryUsage = DeviceStatus.ApplicationCurrentMemoryUsage;
+            string FirmwareVersion = DeviceStatus.DeviceFirmwareVersion;
+            string HardwareVersion = DeviceStatus.DeviceHardwareVersion;
+            string Manufacturer = DeviceStatus.DeviceManufacturer;
+            string DeviceName = DeviceStatus.DeviceName;
+            long TotalMemory = DeviceStatus.DeviceTotalMemory;
+            string OSVersion = Environment.OSVersion.Version.ToString(); ;
+
+            deviceInfo.AppendLine("\n\n\n\n\n\n\n\n\n");
+            deviceInfo.AppendLine("Memory Usage :" + ApplicationMemoryUsage);
+            deviceInfo.AppendLine("Firmware Version :" + FirmwareVersion);
+            deviceInfo.AppendLine("Hardware Version :" + HardwareVersion);
+            deviceInfo.AppendLine("Manufacturer :" + Manufacturer);
+            deviceInfo.AppendLine("Total Memory :" + TotalMemory);
+            deviceInfo.AppendLine("Operating System: Windows Phone " + OSVersion.ToString());
+
+            EmailComposeTask emailcomposer = new EmailComposeTask();
+            emailcomposer.To = "vineetkrishnan@hotmail.com";
+            emailcomposer.Subject = "Translocator Feedback";
+            emailcomposer.Body = deviceInfo.ToString();
+            emailcomposer.Show();
         }
    }
 }

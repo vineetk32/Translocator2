@@ -62,7 +62,8 @@
         </Style>
 
         <ControlTemplate  x:Key="StopPin" TargetType="my:Pushpin" >
-    		<Ellipse Fill="DarkGray" Width="15" Height="15" Stroke="White" Opacity="0.8"/>
+    		<!-- <Ellipse Fill="DarkGray" Width="15" Height="15" Stroke="White" Opacity="0.8"/> -->
+            <Image Source="Images/Bus_stop_symbol.png" Height="25" Width="25"/>
     	</ControlTemplate>
 
     	<ControlTemplate  x:Key="VehiclePin" TargetType="my:Pushpin">
@@ -71,7 +72,7 @@
     	</ControlTemplate>
         
     	<ControlTemplate  x:Key="MyLocationPin" TargetType="my:Pushpin" >
-    		<Ellipse Fill="Blue" Width="30" Height="30" Stroke="White" />
+    		<Ellipse Fill="Blue" Width="20" Height="20" Stroke="White" />
     	</ControlTemplate>
 
     	<local:PushpinScaleTransform x:Key="PushpinScaleTransform"/>
