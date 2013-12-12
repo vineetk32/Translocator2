@@ -18,6 +18,7 @@ namespace Translocator
     public partial class MapPage : PhoneApplicationPage
     {
         GeoCoordinateWatcher locationWatcher;
+        bool centerInitialized;
 
         public MapPage()
         {
@@ -28,8 +29,9 @@ namespace Translocator
 
 
             //myMap.ZoomBarVisibility = Visibility.Visible;
-            myMap.Center = new GeoCoordinate(35.76733, -78.69568);
-            myMap.ZoomLevel = 17.0;
+            //myMap.Center = new GeoCoordinate(35.76733, -78.69568);
+            //myMap.ZoomLevel = 17.0;
+            centerInitialized = false;
 
         }
 
@@ -70,6 +72,11 @@ namespace Translocator
                 {
                     addSegmentToMap(App.ViewModel.segmentCache[segmentID], App.ViewModel.routeCache[routeID].color);
                 }
+            }
+            if (App.ViewModel.currVehicles.Count() > 0 && centerInitialized == false)
+            {
+                myMap.SetView(App.ViewModel.currVehicles[0].VehicleLocation, 15.0);
+                centerInitialized = true;
             }
         }
 

@@ -7,9 +7,9 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Translocator")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Application for tracking public transit supported by TransLoc, Inc.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Vineet Krishnan")]
 [assembly: AssemblyProduct("Translocator")]
 [assembly: AssemblyCopyright("Copyright KrApps©  2013")]
 [assembly: AssemblyTrademark("")]
