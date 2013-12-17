@@ -84,6 +84,7 @@ namespace Translocator
 
         public void addAgencies(List<Agency> retrievedAgencies)
         {
+            retrievedAgencies.Sort(delegate(Agency a1, Agency a2) { return a1.AgencyShortName.CompareTo(a2.AgencyShortName); });
             Deployment.Current.Dispatcher.BeginInvoke(delegate
             {
                 foreach (Agency agency in retrievedAgencies)

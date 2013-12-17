@@ -16,31 +16,12 @@ namespace Translocator
 {
     public partial class MainPage : PhoneApplicationPage
     {
-        // Constructor
-        bool isMapUptoDate;
-
-        public bool isMapUpDated
-        {
-            get
-            {
-                return isMapUptoDate;
-            }
-            set
-            {
-                if (isMapUptoDate != value)
-                {
-                    isMapUptoDate = value;
-                }
-            }
-        }
 
         public MainPage()
         {
             InitializeComponent();
 
             ParentPivot.Items.Remove(StopsPivot);
-
-            isMapUptoDate = false;
 
             DataContext = App.ViewModel;
 
@@ -137,7 +118,6 @@ namespace Translocator
             {
                 ShowRoutes();
             }
-            isMapUptoDate = false;
         }
 
         private void chkAgency_Unchecked(object sender, RoutedEventArgs e)
@@ -146,7 +126,6 @@ namespace Translocator
             {
                 HideRoutes();
             }
-            isMapUptoDate = false;
         }
 
         private void chkRoute_Checked(object sender, RoutedEventArgs e)
@@ -156,7 +135,6 @@ namespace Translocator
                 ShowStops();
                 ShowMaps();
             }
-            isMapUptoDate = false;
         }
 
         private void chkRoute_Unchecked(object sender, RoutedEventArgs e)
@@ -166,7 +144,6 @@ namespace Translocator
                 HideStops();
                 HideMaps();
             }
-            isMapUptoDate = false;
         }
 
         private void ParentPivot_LoadedPivotItem(object sender, PivotItemEventArgs e)
@@ -198,20 +175,20 @@ namespace Translocator
         {
             StringBuilder deviceInfo = new StringBuilder();
 
-
             long ApplicationMemoryUsage = DeviceStatus.ApplicationCurrentMemoryUsage;
             string FirmwareVersion = DeviceStatus.DeviceFirmwareVersion;
             string HardwareVersion = DeviceStatus.DeviceHardwareVersion;
             string Manufacturer = DeviceStatus.DeviceManufacturer;
             string DeviceName = DeviceStatus.DeviceName;
             long TotalMemory = DeviceStatus.DeviceTotalMemory;
-            string OSVersion = Environment.OSVersion.Version.ToString(); ;
+            string OSVersion = Environment.OSVersion.Version.ToString();
 
             deviceInfo.AppendLine("\n\n\n\n\n\n\n\n\n");
             deviceInfo.AppendLine("Memory Usage :" + ApplicationMemoryUsage);
             deviceInfo.AppendLine("Firmware Version :" + FirmwareVersion);
             deviceInfo.AppendLine("Hardware Version :" + HardwareVersion);
             deviceInfo.AppendLine("Manufacturer :" + Manufacturer);
+            deviceInfo.AppendLine("Device Name :" + DeviceName);
             deviceInfo.AppendLine("Total Memory :" + TotalMemory);
             deviceInfo.AppendLine("Operating System: Windows Phone " + OSVersion.ToString());
 
