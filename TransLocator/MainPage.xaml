@@ -16,12 +16,14 @@
     shell:SystemTray.IsVisible="True">
 
 
-   <!--LayoutRoot is the root grid where all page content is placed-->
+    <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
         <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" LoadedPivotItem="ParentPivot_LoadedPivotItem">
 
             <controls:PivotItem Header="routes" x:Name="RoutesPivot">
+                <StackPanel>
+                    <TextBlock x:Name="TxtNoRoutes" TextWrapping="Wrap" Text="No routes found. Press A to select an Agency" Height="194" Width="408" Opacity="0.7" FontSize="24"/>
                 <ListBox x:Name="RoutesListBox" Margin="0,0,-12,0" ItemsSource="{Binding routes}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -42,6 +44,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                </StackPanel>
             </controls:PivotItem>
 
             <!--Pivot item two-->
@@ -55,14 +58,14 @@
                     <toolkit:ListPicker Grid.Row="0" x:Name="RouteCombo" Header="Selected Route" ItemsSource="{Binding selectedRoutesNames}" Margin="20" SelectionChanged="RouteList_SelectionChanged"/>
 
                     <ListBox Grid.Row="1" x:Name="StopsListBox" Margin="0,0,-12,0" ItemsSource="{Binding stops}" CacheMode="BitmapCache">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:Name="CurrStop">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:Name="CurrStop">
                                 <StackPanel Visibility="{Binding IsVisible, Converter={StaticResource boolToVisibility}}">
                                     <TextBlock Text="{Binding StopName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
-                            <TextBlock Text="{Binding StopCode, StringFormat='Stop code: {0}'}" TextWrapping="Wrap" Style="{StaticResource PhoneTextSmallStyle}"/>
-                                <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
+                                    <TextBlock Text="{Binding StopCode, StringFormat='Stop code: {0}'}" TextWrapping="Wrap" Style="{StaticResource PhoneTextSmallStyle}"/>
+                                    <ListBox x:Name="ArrivalsListBox" ItemsSource="{Binding ArrivalEstimates}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
                                                 <StackPanel>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
@@ -75,19 +78,19 @@
                                                     </Grid>
                                                 </StackPanel>
                                             </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
                 </Grid>
             </controls:PivotItem>
 
 
         </controls:Pivot>
-        </Grid>
+    </Grid>
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
             <shell:ApplicationBarIconButton x:Name="MapsButton" IconUri="/Images/appbar.map.gps.png" Text="Map" IsEnabled="False" Click="MapsButton_Click"/>

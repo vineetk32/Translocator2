@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Microsoft.Phone.Tasks;
 using System.Text;
 using Microsoft.Phone.Info;
+using System.Windows.Navigation;
 
 namespace Translocator
 {
@@ -158,6 +159,19 @@ namespace Translocator
                 {
                     HideStops();
                 }
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (App.ViewModel.selectedAgencies.Count == 0)
+            {
+                TxtNoRoutes.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                TxtNoRoutes.Visibility = Visibility.Collapsed;
+
             }
         }
 
