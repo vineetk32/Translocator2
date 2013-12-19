@@ -22,7 +22,7 @@
         <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" LoadedPivotItem="ParentPivot_LoadedPivotItem">
 
             <controls:PivotItem Header="routes" x:Name="RoutesPivot">
-                <StackPanel>
+                <Grid>
                     <TextBlock x:Name="TxtNoRoutes" TextWrapping="Wrap" Text="No routes found. Press A to select an Agency" Height="194" Width="408" Opacity="0.7" FontSize="24"
                                Visibility="{Binding routes.Count, Converter={StaticResource IntToVisibility}}"/>
                     <ListBox x:Name="RoutesListBox" Margin="0,0,-12,0" ItemsSource="{Binding routes}">
@@ -42,7 +42,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                </StackPanel>
+                </Grid>
             </controls:PivotItem>
 
             <!--Pivot item two-->
