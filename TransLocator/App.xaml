@@ -36,7 +36,7 @@
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                    <Border Grid.Row="0" Grid.Column="0" Background="{Binding Value.RouteColor}" Margin="5,1,5,1">
+                                                    <Border Grid.Row="0" Grid.Column="0" Background="{Binding Value.RouteColor}" Margin="5,1,5,1" Height="30">
                                                         <TextBlock  TextWrapping="Wrap" Text="{Binding Value.RouteShortName, Mode=OneWay}" Foreground="White" Style="{StaticResource PhoneTextSmallStyle}"/>
                                                     </Border>
                                                     <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value.RouteName, Mode=OneWay}" Foreground="Black" Style="{StaticResource PhoneTextSmallStyle}"/>

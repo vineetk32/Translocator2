@@ -263,7 +263,8 @@ namespace Translocator
                     ArrivalInfo arrivalInfo = new ArrivalInfo();
                     arrivalInfo.ArrivalTimes = "--";
                     arrivalInfo.RouteColor = '#' + routeCache[currRouteID].color;
-                    arrivalInfo.RouteName = routeCache[currRouteID].short_name + " - " + routeCache[currRouteID].long_name;
+                    arrivalInfo.RouteShortName = routeCache[currRouteID].short_name;
+                    arrivalInfo.RouteName = routeCache[currRouteID].long_name;
                     if (arrivalCache.ContainsKey(currStopID))
                     {
                         arrivalCache[currStopID].Add(currRouteID, arrivalInfo);
