@@ -17,6 +17,7 @@
     <Application.Resources>
 
         <local:BooleanToVisibilityConverter x:Key="boolToVisibility"/>
+        <local:IntToVisibilityConverter x:Key="IntToVisibility"/>
 
         <Style x:Key="MenuItemStyle" TargetType="sltkit:MenuItem">
             <Setter Property="Template">
@@ -31,11 +32,15 @@
                                         <StackPanel>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Row="0" Grid.Column="0" TextWrapping="Wrap" Text="{Binding Value.RouteName, Mode=OneWay}"  Style="{StaticResource PhoneTextSmallStyle}" Foreground="{Binding Value.RouteColor}"/>
-                                                <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value.ArrivalTimes, Mode=OneWay}" Style="{StaticResource PhoneTextSmallStyle}" Foreground="{Binding Value.RouteColor}" />
+                                                    <Border Grid.Row="0" Grid.Column="0" Background="{Binding Value.RouteColor}" Margin="5,1,5,1">
+                                                        <TextBlock  TextWrapping="Wrap" Text="{Binding Value.RouteShortName, Mode=OneWay}" Foreground="White" Style="{StaticResource PhoneTextSmallStyle}"/>
+                                                    </Border>
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value.RouteName, Mode=OneWay}" Foreground="Black" Style="{StaticResource PhoneTextSmallStyle}"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="2" TextWrapping="Wrap" Text="{Binding Value.ArrivalTimes, Mode=OneWay}" Foreground="Black" Style="{StaticResource PhoneTextSmallStyle}"/>
                                             </Grid>
                                         </StackPanel>
                                     </DataTemplate>
@@ -53,7 +58,7 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <Border Margin="24" 
-                               BorderBrush="Black" BorderThickness="2" Background="LightGoldenrodYellow">
+                               BorderBrush="Black" BorderThickness="2" Background="White">
                             <ItemsPresenter />
                         </Border>
                     </ControlTemplate>

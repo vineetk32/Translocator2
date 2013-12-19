@@ -10,7 +10,7 @@ namespace Translocator
 {
     public class ArrivalInfo
     {
-        private string routeName, arrivalTimes, routeColor;
+        private string routeShortName,routeName, arrivalTimes, routeColor;
         //private List<DateTime> rawArrivalTimes;
 
         public string RouteName
@@ -25,6 +25,20 @@ namespace Translocator
                     routeName = value;
             }
         }
+
+        public string RouteShortName
+        {
+            get
+            {
+                return routeShortName;
+            }
+            set
+            {
+                if (value != routeShortName)
+                    routeShortName = value;
+            }
+        }
+
 
         public string ArrivalTimes
         {

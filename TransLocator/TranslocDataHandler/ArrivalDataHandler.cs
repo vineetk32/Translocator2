@@ -63,7 +63,7 @@ namespace Translocator
                     {
                         arrivalTime = timeDiff.Minutes.ToString() + " mins";
                     }
-                    string routeName = routeCacheRef[arrival.route_id].short_name + " - " + routeCacheRef[arrival.route_id].long_name;
+                    //string routeName = routeCacheRef[arrival.route_id].short_name + " - " + routeCacheRef[arrival.route_id].long_name;
                     long routeID = arrival.route_id;
 
                     if (arrivalCacheRef[stopID][routeID].ArrivalTimes != "--")
@@ -73,7 +73,8 @@ namespace Translocator
                     else
                     {
                         ArrivalInfo arrivalInfo = new ArrivalInfo();
-                        arrivalInfo.RouteName = routeName;
+                        arrivalInfo.RouteName = routeCacheRef[routeID].long_name;
+                        arrivalInfo.RouteShortName = routeCacheRef[routeID].short_name;
                         arrivalInfo.RouteColor = '#' + routeCacheRef[routeID].color;
                         arrivalInfo.ArrivalTimes = arrivalTime;
                         (arrivalCacheRef[stopID])[routeID] = arrivalInfo;

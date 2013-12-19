@@ -37,6 +37,29 @@ namespace Translocator
         }
     }
 
+    public class IntToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+                return Visibility.Collapsed;
+
+            var count = (int) value;
+
+            if (count == 0)
+                return Visibility.Visible;
+            else
+                return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var visiblity = (Visibility)value;
+
+            return visiblity == Visibility.Visible;
+        }
+    }
+
     class Util
     {
         public const string TRANSLOC_URL_BASE_12 = "http://api.transloc.com/1.2/";

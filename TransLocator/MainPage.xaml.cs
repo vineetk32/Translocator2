@@ -162,18 +162,18 @@ namespace Translocator
             }
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            if (App.ViewModel.selectedAgencies.Count == 0)
-            {
-                TxtNoRoutes.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                TxtNoRoutes.Visibility = Visibility.Collapsed;
+        //protected override void OnNavigatedTo(NavigationEventArgs e)
+        //{
+        //    if (App.ViewModel.selectedAgencies.Count == 0)
+        //    {
+        //        TxtNoRoutes.Visibility = Visibility.Visible;
+        //    }
+        //    else
+        //    {
+        //        TxtNoRoutes.Visibility = Visibility.Collapsed;
 
-            }
-        }
+        //    }
+        //}
 
         private void MapsButton_Click(object sender, EventArgs e)
         {
