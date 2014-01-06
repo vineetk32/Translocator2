@@ -31,12 +31,12 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 
                                 <CheckBox x:Name="chkRoute" Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" Checked="chkRoute_Checked" Unchecked="chkRoute_Unchecked" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1"  Text="{Binding RouteShortName}" Style="{StaticResource PhoneTextLargeStyle}" Foreground="{Binding TextColor}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1"  Text="{Binding RouteShortName}" Style="{StaticResource PhoneTextLargeStyle}" Foreground="{Binding TextColor}" VerticalAlignment="Center" Visibility="{Binding RouteShortName,Converter={StaticResource StringToVisibility}}"/>
                                 <TextBlock Grid.Column="2" Text="{Binding RouteName}" Foreground="{Binding TextColor}" Style="{StaticResource PhoneTextLargeStyle}" VerticalAlignment="Center"/>
                             </Grid>
                         </DataTemplate>

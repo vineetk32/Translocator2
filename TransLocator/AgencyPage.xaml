@@ -41,9 +41,9 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <CheckBox x:Name="chkAgency" Grid.Column="0" Grid.Row="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
-                                <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding AgencyShortName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding AgencyName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
+                            <CheckBox x:Name="chkAgency" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Top" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding AgencyShortName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" />
+                            <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding AgencyName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}"/>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

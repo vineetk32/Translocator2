@@ -18,6 +18,7 @@
 
         <local:BooleanToVisibilityConverter x:Key="boolToVisibility"/>
         <local:IntToVisibilityConverter x:Key="IntToVisibility"/>
+        <local:StringToVisibilityConverter x:Key="StringToVisibility"/>
 
         <Style x:Key="MenuItemStyle" TargetType="sltkit:MenuItem">
             <Setter Property="Template">
