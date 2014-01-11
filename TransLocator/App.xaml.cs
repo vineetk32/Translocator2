@@ -163,6 +163,7 @@ namespace Translocator
                 // A navigation has failed; break into the debugger
                 System.Diagnostics.Debugger.Break();
             }
+            Util.ReportException(e.Exception);
         }
 
         // Code to execute on Unhandled Exceptions
@@ -173,6 +174,7 @@ namespace Translocator
                 // An unhandled exception has occurred; break into the debugger
                 System.Diagnostics.Debugger.Break();
             }
+            Util.ReportException(e.ExceptionObject);
         }
 
         #region Phone application initialization

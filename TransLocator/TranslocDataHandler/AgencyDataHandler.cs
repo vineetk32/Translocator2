@@ -116,20 +116,22 @@ namespace Translocator
         private void ReadAgencyCallback(IAsyncResult asynchronousResult)
         {
             string resultString = Util.ProcessCallBack(asynchronousResult);
-            var agencyroot = JsonConvert.DeserializeObject<AgencyRoot>(resultString);
-
-            //List<Agency> retrievedAgencies;
-
-            foreach (Agency agency in agencyroot.data)
+            if (resultString != null)
             {
-                if (App.ViewModel.restoredAgencies.Contains(agency.agency_id))
-                {
-                    agency.IsSelected = true;
-                }
-            }
-            App.ViewModel.restoredAgencies.Clear();
-            App.ViewModel.addAgencies(agencyroot.data);
+                var agencyroot = JsonConvert.DeserializeObject<AgencyRoot>(resultString);
 
+                //List<Agency> retrievedAgencies;
+
+                foreach (Agency agency in agencyroot.data)
+                {
+                    if (App.ViewModel.restoredAgencies.Contains(agency.agency_id))
+                    {
+                        agency.IsSelected = true;
+                    }
+                }
+                App.ViewModel.restoredAgencies.Clear();
+                App.ViewModel.addAgencies(agencyroot.data);
+            }
         }
 
         public void addAgencies()

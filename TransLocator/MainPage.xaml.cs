@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Controls.Maps;
-using System.Device.Location;
 using Microsoft.Phone.Shell;
 using System.IO.IsolatedStorage;
 using System.Collections.Generic;
-using Microsoft.Phone.Tasks;
-using System.Text;
-using Microsoft.Phone.Info;
 using System.Windows.Navigation;
 
 namespace Translocator
@@ -187,30 +181,7 @@ namespace Translocator
 
         private void ClickEvent(object sender, EventArgs e)
         {
-            StringBuilder deviceInfo = new StringBuilder();
-
-            long ApplicationMemoryUsage = DeviceStatus.ApplicationCurrentMemoryUsage;
-            string FirmwareVersion = DeviceStatus.DeviceFirmwareVersion;
-            string HardwareVersion = DeviceStatus.DeviceHardwareVersion;
-            string Manufacturer = DeviceStatus.DeviceManufacturer;
-            string DeviceName = DeviceStatus.DeviceName;
-            long TotalMemory = DeviceStatus.DeviceTotalMemory;
-            string OSVersion = Environment.OSVersion.Version.ToString();
-
-            deviceInfo.AppendLine("\n\n\n\n\n\n\n\n\n");
-            deviceInfo.AppendLine("Memory Usage :" + ApplicationMemoryUsage);
-            deviceInfo.AppendLine("Firmware Version :" + FirmwareVersion);
-            deviceInfo.AppendLine("Hardware Version :" + HardwareVersion);
-            deviceInfo.AppendLine("Manufacturer :" + Manufacturer);
-            deviceInfo.AppendLine("Device Name :" + DeviceName);
-            deviceInfo.AppendLine("Total Memory :" + TotalMemory);
-            deviceInfo.AppendLine("Operating System: Windows Phone " + OSVersion.ToString());
-
-            EmailComposeTask emailcomposer = new EmailComposeTask();
-            emailcomposer.To = "vineetkrishnan@hotmail.com";
-            emailcomposer.Subject = "Translocator Feedback";
-            emailcomposer.Body = deviceInfo.ToString();
-            emailcomposer.Show();
+            NavigationService.Navigate(new Uri("/AboutPivot.xaml", UriKind.Relative));
         }
-   }
+    }
 }

@@ -104,24 +104,27 @@ namespace Translocator
         private void ReadVehiclesCallback(IAsyncResult asynchronousResult)
         {
             string resultString = Util.ProcessCallBack(asynchronousResult);
-            var vehiclesroot = JsonConvert.DeserializeObject<VehicleRoot>(resultString);
-            Dictionary<long, Route> routeCacheRef = App.ViewModel.routeCache;
-
-           List<Vehicle> retrievedVehicles = new List<Vehicle>();
-
-            foreach (var agencyID in vehiclesroot.data.Keys)
+            if (resultString != null)
             {
-                foreach (var vehicle in vehiclesroot.data[agencyID])
-                {
-                    vehicle.Color = '#' + routeCacheRef[vehicle.route_id].color;
-                    vehicle.RouteShortName = routeCacheRef[vehicle.route_id].short_name;
+                var vehiclesroot = JsonConvert.DeserializeObject<VehicleRoot>(resultString);
+                Dictionary<long, Route> routeCacheRef = App.ViewModel.routeCache;
 
-                    /*if (selectedRoutes.Contains(vehicle.route_id))
-                    {}*/
-                    retrievedVehicles.Add(vehicle);
+                List<Vehicle> retrievedVehicles = new List<Vehicle>();
+
+                foreach (var agencyID in vehiclesroot.data.Keys)
+                {
+                    foreach (var vehicle in vehiclesroot.data[agencyID])
+                    {
+                        vehicle.Color = '#' + routeCacheRef[vehicle.route_id].color;
+                        vehicle.RouteShortName = routeCacheRef[vehicle.route_id].short_name;
+
+                        /*if (selectedRoutes.Contains(vehicle.route_id))
+                        {}*/
+                        retrievedVehicles.Add(vehicle);
+                    }
                 }
+                App.ViewModel.addVehicles(retrievedVehicles);
             }
-            App.ViewModel.addVehicles(retrievedVehicles);
         }
     }
 }

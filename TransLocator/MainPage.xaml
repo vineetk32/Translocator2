@@ -19,7 +19,7 @@
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
-        <controls:Pivot x:Name="ParentPivot" Title="Transit Tracker" LoadedPivotItem="ParentPivot_LoadedPivotItem">
+        <controls:Pivot x:Name="ParentPivot" Title="Translocator" LoadedPivotItem="ParentPivot_LoadedPivotItem">
 
             <controls:PivotItem Header="routes" x:Name="RoutesPivot">
                 <Grid>
@@ -94,7 +94,7 @@
             <shell:ApplicationBarIconButton x:Name="MapsButton" IconUri="/Images/appbar.map.gps.png" Text="Map" IsEnabled="False" Click="MapsButton_Click"/>
             <shell:ApplicationBarIconButton x:Name="AgenciesButton" IconUri="/Images/Agencies.png" Text="Agencies" IsEnabled="True" Click="AgenciesButton_Click"/>
             <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem x:Name="FeedBackLabel" Text="send feedback" Click="ClickEvent"/>
+                <shell:ApplicationBarMenuItem x:Name="AboutLabel" Text="about" Click="ClickEvent"/>
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>

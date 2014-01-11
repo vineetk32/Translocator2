@@ -240,9 +240,11 @@ namespace Translocator
         private void ReadStopsCallback(IAsyncResult asynchronousResult)
         {
             string resultString = Util.ProcessCallBack(asynchronousResult);
-            var stopsroot = JsonConvert.DeserializeObject<StopRoot>(resultString);
-
-            App.ViewModel.addStops(stopsroot.data);
+            if (resultString != null)
+            {
+                var stopsroot = JsonConvert.DeserializeObject<StopRoot>(resultString);
+                App.ViewModel.addStops(stopsroot.data);
+            }
         }
     }
 }

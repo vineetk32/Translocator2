@@ -160,22 +160,25 @@ namespace Translocator
         private void ReadRoutesCallback(IAsyncResult asynchronousResult)
         {
             string resultString = Util.ProcessCallBack(asynchronousResult);
-            var routeroot = JsonConvert.DeserializeObject<RouteRoot>(resultString);
-
-            List<Route> retrievedRoutes = new List<Route>();
-
-            foreach (var agency in routeroot.data)
+            if (resultString != null)
             {
-                foreach (var route in agency.Value)
+                var routeroot = JsonConvert.DeserializeObject<RouteRoot>(resultString);
+
+                List<Route> retrievedRoutes = new List<Route>();
+
+                foreach (var agency in routeroot.data)
                 {
-                    route.is_active = true;
-                    if (route.is_active == true)
+                    foreach (var route in agency.Value)
                     {
-                        retrievedRoutes.Add(route);
+                        route.is_active = true;
+                        if (route.is_active == true)
+                        {
+                            retrievedRoutes.Add(route);
+                        }
                     }
                 }
+                App.ViewModel.addRoutes(retrievedRoutes);
             }
-            App.ViewModel.addRoutes(retrievedRoutes);
         }
 
         public void addRoutes(long agencyID)

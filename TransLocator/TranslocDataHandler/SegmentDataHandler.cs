@@ -19,14 +19,17 @@ namespace Translocator
         private void ReadSegmentsCallback(IAsyncResult asynchronousResult)
         {
             string resultString = Util.ProcessCallBack(asynchronousResult);
-            var segmentsroot = JsonConvert.DeserializeObject<SegmentRoot>(resultString);
-
-            Dictionary<long,string> segmentCacheRef = App.ViewModel.segmentCache;
-            foreach (var segment in segmentsroot.data.Keys)
+            if (resultString != null)
             {
-                if (segmentCacheRef.ContainsKey(segment) == false)
+                var segmentsroot = JsonConvert.DeserializeObject<SegmentRoot>(resultString);
+
+                Dictionary<long, string> segmentCacheRef = App.ViewModel.segmentCache;
+                foreach (var segment in segmentsroot.data.Keys)
                 {
-                    segmentCacheRef.Add(segment, segmentsroot.data[segment]);
+                    if (segmentCacheRef.ContainsKey(segment) == false)
+                    {
+                        segmentCacheRef.Add(segment, segmentsroot.data[segment]);
+                    }
                 }
             }
         }

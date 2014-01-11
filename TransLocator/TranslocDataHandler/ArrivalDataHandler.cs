@@ -39,65 +39,68 @@ namespace Translocator
         private void ReadArrivalCallback(IAsyncResult asynchronousResult)
         {
             string resultString = Util.ProcessCallBack(asynchronousResult);
-            var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
-            DateTime currTime = DateTime.Now;
-
-            Dictionary<long,Route> routeCacheRef = App.ViewModel.routeCache;
-            Dictionary<long,Dictionary<long,ArrivalInfo>> arrivalCacheRef = App.ViewModel.arrivalCache;
-
-            foreach (var stoparrival in arrivalsroot.data)
+            if (resultString != null)
             {
-                long stopID = stoparrival.stop_id;
-                foreach (var arrival in stoparrival.arrivals)
+                var arrivalsroot = JsonConvert.DeserializeObject<ArrivalRoot>(resultString);
+                DateTime currTime = DateTime.Now;
+
+                Dictionary<long, Route> routeCacheRef = App.ViewModel.routeCache;
+                Dictionary<long, Dictionary<long, ArrivalInfo>> arrivalCacheRef = App.ViewModel.arrivalCache;
+
+                foreach (var stoparrival in arrivalsroot.data)
                 {
-                    DateTime rawArrivalTime = DateTime.Parse(arrival.arrival_at);
-                    TimeSpan timeDiff = rawArrivalTime - currTime;
+                    long stopID = stoparrival.stop_id;
+                    foreach (var arrival in stoparrival.arrivals)
+                    {
+                        DateTime rawArrivalTime = DateTime.Parse(arrival.arrival_at);
+                        TimeSpan timeDiff = rawArrivalTime - currTime;
 
-                    //string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
-                    string arrivalTime;
-                    if (timeDiff.Minutes < 1)
-                    {
-                        arrivalTime = "< 1 min";
-                    }
-                    else
-                    {
-                        arrivalTime = timeDiff.Minutes.ToString() + " mins";
-                    }
-                    //string routeName = routeCacheRef[arrival.route_id].short_name + " - " + routeCacheRef[arrival.route_id].long_name;
-                    long routeID = arrival.route_id;
+                        //string arrivalTime = DateTime.Parse(arrival.arrival_at).ToShortTimeString();
+                        string arrivalTime;
+                        if (timeDiff.Minutes < 1)
+                        {
+                            arrivalTime = "< 1 min";
+                        }
+                        else
+                        {
+                            arrivalTime = timeDiff.Minutes.ToString() + " mins";
+                        }
+                        //string routeName = routeCacheRef[arrival.route_id].short_name + " - " + routeCacheRef[arrival.route_id].long_name;
+                        long routeID = arrival.route_id;
 
-                    if (arrivalCacheRef[stopID][routeID].ArrivalTimes != "--")
-                    {
-                        (arrivalCacheRef[stopID])[routeID].ArrivalTimes += ", " + arrivalTime;
-                    }
-                    else
-                    {
-                        ArrivalInfo arrivalInfo = new ArrivalInfo();
-                        arrivalInfo.RouteName = routeCacheRef[routeID].long_name;
-                        arrivalInfo.RouteShortName = routeCacheRef[routeID].short_name;
-                        arrivalInfo.RouteColor = '#' + routeCacheRef[routeID].color;
-                        arrivalInfo.ArrivalTimes = arrivalTime;
-                        (arrivalCacheRef[stopID])[routeID] = arrivalInfo;
+                        if (arrivalCacheRef[stopID][routeID].ArrivalTimes != "--")
+                        {
+                            (arrivalCacheRef[stopID])[routeID].ArrivalTimes += ", " + arrivalTime;
+                        }
+                        else
+                        {
+                            ArrivalInfo arrivalInfo = new ArrivalInfo();
+                            arrivalInfo.RouteName = routeCacheRef[routeID].long_name;
+                            arrivalInfo.RouteShortName = routeCacheRef[routeID].short_name;
+                            arrivalInfo.RouteColor = '#' + routeCacheRef[routeID].color;
+                            arrivalInfo.ArrivalTimes = arrivalTime;
+                            (arrivalCacheRef[stopID])[routeID] = arrivalInfo;
+                        }
                     }
                 }
-            }
-            /*StringBuilder contents = new StringBuilder();
-            foreach (long StopID in arrivalCache.Keys)
-            {
-                contents.Append("\n" + StopID.ToString());
-                foreach (string RouteName in arrivalCache[StopID].Keys)
+                /*StringBuilder contents = new StringBuilder();
+                foreach (long StopID in arrivalCache.Keys)
                 {
-                    contents.Append(" " + RouteName.ToString() + ":" + arrivalCache[StopID][RouteName]);
+                    contents.Append("\n" + StopID.ToString());
+                    foreach (string RouteName in arrivalCache[StopID].Keys)
+                    {
+                        contents.Append(" " + RouteName.ToString() + ":" + arrivalCache[StopID][RouteName]);
+                    }
                 }
+                cleanUpStops(); 
+                //TODO - remove this bullshit way of doing this, and use await() instead.
+                if (App.ViewModel.selectedRoutesNames.Count > 0 && App.ViewModel.stops.Count == 0)
+                {
+                    string route = App.ViewModel.selectedRoutesNames[0];
+                    App.ViewModel.addArrivalsForRoute(route);
+                }*/
+                App.ViewModel.updateStops();
             }
-            cleanUpStops(); 
-            //TODO - remove this bullshit way of doing this, and use await() instead.
-            if (App.ViewModel.selectedRoutesNames.Count > 0 && App.ViewModel.stops.Count == 0)
-            {
-                string route = App.ViewModel.selectedRoutesNames[0];
-                App.ViewModel.addArrivalsForRoute(route);
-            }*/
-            App.ViewModel.updateStops();
         }
 
         public void cacheArrivals(long agencyID,long routeID)

@@ -95,7 +95,7 @@ namespace Translocator
             locationWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(locationWatcher_getPosition);
             if (locationWatcher.Status == GeoPositionStatus.Disabled)
             {
-                MessageBox.Show("Please enable location in settings!");
+                MessageBox.Show("Cannot access location. Please check settings.");
                 return;
             }
             locationWatcher.Start();
