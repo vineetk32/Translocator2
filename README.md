@@ -5,6 +5,8 @@ Translocator
 Translocator is an application to track buses for agencies supported by Transloc (www.transloc.com) 
 in real-time on a map.
 
+Download here - http://windowsphone.com/s?appId=3fe62a9c-4056-400c-8dcd-c0d7065b9bf4
+
 Transloc currently provides tracking information for the following agencies - 
 * Chapel Hill Transit
 * Triangle Transit
@@ -47,5 +49,6 @@ Transloc currently provides tracking information for the following agencies -
 * University of Arizona
 * Oakland University
 * Quinnipiac University
+
 
 
