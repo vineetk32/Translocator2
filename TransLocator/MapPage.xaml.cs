@@ -70,7 +70,16 @@ namespace Translocator
             {
                 foreach (long segmentID in App.ViewModel.routeCache[routeID].segments)
                 {
-                    addSegmentToMap(App.ViewModel.segmentCache[segmentID], App.ViewModel.routeCache[routeID].color);
+                    try
+                    {
+                        addSegmentToMap(App.ViewModel.segmentCache[segmentID], App.ViewModel.routeCache[routeID].color);
+                    }
+                    //TODO: Find out the specific situation where this fails, and handle it better.
+                    catch (KeyNotFoundException ex)
+                    {
+                        //Skip this segment and continue.
+                        continue;
+                    }
                 }
             }
             if (App.ViewModel.currVehicles.Count() > 0 && centerInitialized == false)

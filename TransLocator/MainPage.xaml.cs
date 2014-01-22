@@ -6,6 +6,7 @@ using Microsoft.Phone.Shell;
 using System.IO.IsolatedStorage;
 using System.Collections.Generic;
 using System.Windows.Navigation;
+using Microsoft.Phone.Tasks;
 
 namespace Translocator
 {
@@ -156,8 +157,8 @@ namespace Translocator
             }
         }
 
-        //protected override void OnNavigatedTo(NavigationEventArgs e)
-        //{
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
         //    if (App.ViewModel.selectedAgencies.Count == 0)
         //    {
         //        TxtNoRoutes.Visibility = Visibility.Visible;
@@ -165,9 +166,21 @@ namespace Translocator
         //    else
         //    {
         //        TxtNoRoutes.Visibility = Visibility.Collapsed;
-
         //    }
-        //}
+            //Courtesy:MSDN
+            var askforReview = (bool)IsolatedStorageSettings.ApplicationSettings["askforreview"];
+            if (askforReview)
+            {
+                //make sure we only ask once! 
+                IsolatedStorageSettings.ApplicationSettings["askforreview"] = false;
+                var returnvalue = MessageBox.Show("Would you like to review Translocator on the Windows Phone Store?", "Thank you for using Translocator!", MessageBoxButton.OKCancel);
+                if (returnvalue == MessageBoxResult.OK)
+                {
+                    var marketplaceReviewTask = new MarketplaceReviewTask();
+                    marketplaceReviewTask.Show();
+                }
+            } 
+        }
 
         private void MapsButton_Click(object sender, EventArgs e)
         {

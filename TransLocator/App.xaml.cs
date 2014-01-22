@@ -116,6 +116,20 @@ namespace Translocator
             {
                 App.ViewModel.LoadData();
             }
+               IsolatedStorageSettings.ApplicationSettings["askforreview"] = false;
+
+            //Bug people for a review on the 5-th app launch
+            int started = 0; 
+            if (IsolatedStorageSettings.ApplicationSettings.Contains("started")) 
+            { 
+                started = (int)IsolatedStorageSettings.ApplicationSettings["started"]; 
+            } 
+            started++; 
+            IsolatedStorageSettings.ApplicationSettings["started"] = started; 
+            if (started == 5) 
+            { 
+                IsolatedStorageSettings.ApplicationSettings["askforreview"] = true; 
+            } 
         }
 
         // Code to execute when the application is activated (brought to foreground)
